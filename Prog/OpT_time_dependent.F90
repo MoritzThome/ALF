@@ -47,9 +47,13 @@ module OpT_time_dependent_mod
     !>
     !--------------------------------------------------------------------
     type, extends(ContainerElementBase) :: OpT_time_dependent
-        Complex(kind=kind(0.d0)) :: g
+Complex(kind=kind(0.d0)), allocatable, dimension(:,:)  :: U(:,:)  !> We  store    the unitary  transformation
+        Real(kind=kind(0.d0)), allocatable, dimension(:)  :: E(:)  !> We  store  the  real  eigenvaules
+        Complex(kind=kind(0.d0)),  allocatable  :: g_t(:)   !>  = - \delta  \tau  t(:) 
         Real(kind=kind(0.d0)) :: Zero
-        Integer :: m, n, Ndim_hop
+        integer, allocatable :: P(:)
+        Integer :: Ndim_hop
+
     contains
         procedure :: init => OpT_time_dependent_init ! initialize and allocate matrices
         procedure :: dealloc => OpT_time_dependent_dealloc ! dealloc matrices
@@ -63,13 +67,18 @@ module OpT_time_dependent_mod
 
 contains
     
-    subroutine OpT_time_dependent_init(this, Op_T)
+    subroutine OpT_time_dependent_init(this, Op_T, g)
         class(OpT_time_dependent) :: this
         Type(Operator), intent(in) :: Op_T
+        Complex(kind=kind(0.d0)), allocatable, intent(in)  :: g(:)
         Integer :: i, j
         
         this%Zero = 1.E-12
         this%Ndim_hop = Op_T%N
+        this%P = Op_T%P ! copy all data locally to be consistent and less error prone
+        this%U = Op_T%U
+        this%E = Op_T%E
+        this%g_t = g
         
     end subroutine
 
@@ -82,6 +91,10 @@ contains
         n1 = size(arg,1)
         n2 = size(arg,2)
         
+        If ( this%g(t)*this%g(t) > this%Zero ) then
+
+        Endif
+        
     end subroutine
     
     subroutine OpT_time_dependent_rmult(this, arg, t)
@@ -93,6 +106,10 @@ contains
         ! taken from mmthl
         n1 = size(arg,1)
         n2 = size(arg,2)
+        
+        If ( this%g(t)*this%g(t) > this%Zero ) then
+
+        Endif
 
     end subroutine
     
@@ -105,6 +122,10 @@ contains
         ! taken from mmthl_m1
         n1 = size(arg,1)
         n2 = size(arg,2)
+        
+        If ( this%g(t)*this%g(t) > this%Zero ) then
+
+        Endif
 
     end subroutine
     
@@ -117,6 +138,10 @@ contains
         ! taken from mmthr
         n1 = size(arg,1)
         n2 = size(arg,2)
+        
+        If ( this%g(t)*this%g(t) > this%Zero ) then
+
+        Endif
 
     end subroutine
     
@@ -125,6 +150,13 @@ contains
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
         Integer, intent(in) :: t
         integer :: n1, n2
+        
+        n1 = size(arg,1)
+        n2 = size(arg,2)
+        
+        If ( this%g(t)*this%g(t) > this%Zero ) then
+
+        Endif
 
     end subroutine
 
@@ -132,11 +164,25 @@ contains
         class(OpT_time_dependent), intent(in) :: this
         integer :: i,j
 
+        do i = 1, size(this%U, 1)
+            write (*,*) (dble(this%U(i,j)), j = 1,size(this%U,2) )
+        enddo
+        write (*,*) "------E--------"
+        do i = 1, size(this%E, 1)
+            write (*,*) this%E(i)
+        enddo
+
+        write (*,*) "------g_t--------"
+        do i = 1, size(this%g_t, 1)
+            write (*,*) this%g_t(i)
+        enddo
+
     end subroutine
     
     subroutine OpT_time_dependent_dealloc(this)
         class(OpT_time_dependent), intent(inout) :: this
         
+        deallocate(this%U, this%E, this%g_t, this%P)
     end subroutine
 
 end module OpT_time_dependent_mod
