@@ -49,11 +49,12 @@ module OpT_time_dependent_mod
     type, extends(ContainerElementBase) :: OpT_time_dependent
 Complex(kind=kind(0.d0)), allocatable, dimension(:,:)  :: U(:,:)  !> We  store    the unitary  transformation
         Real(kind=kind(0.d0)), allocatable, dimension(:)  :: E(:)  !> We  store  the  real  eigenvaules
-        Complex(kind=kind(0.d0)),  allocatable  :: g_t(:)   !>  = - \delta  \tau  t(:) 
+        Complex(kind=kind(0.d0)),  allocatable  :: expg(:)   !>  = - \delta  \tau  t(:) 
         Real(kind=kind(0.d0)) :: Zero
         integer, allocatable :: P(:)
         Integer :: Ndim_hop
 
+        ! Assumption: T = U * E * U^\dagger
     contains
         procedure :: init => OpT_time_dependent_init ! initialize and allocate matrices
         procedure :: dealloc => OpT_time_dependent_dealloc ! dealloc matrices
@@ -66,19 +67,18 @@ Complex(kind=kind(0.d0)), allocatable, dimension(:,:)  :: U(:,:)  !> We  store  
     end type OpT_time_dependent
 
 contains
-    
+
     subroutine OpT_time_dependent_init(this, Op_T, g)
         class(OpT_time_dependent) :: this
         Type(Operator), intent(in) :: Op_T
         Complex(kind=kind(0.d0)), allocatable, intent(in)  :: g(:)
-        Integer :: i, j
         
         this%Zero = 1.E-12
         this%Ndim_hop = Op_T%N
         this%P = Op_T%P ! copy all data locally to be consistent and less error prone
         this%U = Op_T%U
         this%E = Op_T%E
-        this%g_t = g
+        this%expg = exp(g)
         
     end subroutine
 
@@ -86,13 +86,27 @@ contains
         class(OpT_time_dependent), intent(in) :: this
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
         Integer, intent(in) :: t
-        Integer :: n1, n2
+        Integer :: n1, n2, i, j
 
         n1 = size(arg,1)
         n2 = size(arg,2)
         
-        If ( this%g(t)*this%g(t) > this%Zero ) then
-
+        If ( DBLE(log(this%expg(t)) * Conjg(log(this%expg(t)))) > this%Zero ) then
+        
+            ! innermost unitary transform
+            call ZSLGEMM('L', 'C', this%Ndim_hop, n1, n2, this%U, this%P, arg)
+            call ZSLGEMM('R', 'N', this%Ndim_hop, n1, n2, this%U, this%P, arg)
+        
+            ! apply both diagonals
+            do i = 1, n1
+                do j = 1, n2
+                    arg(i, j) = arg(i, j) * sqrt(this%expg(i)/this%expg(j)) ! quickly get the data...
+                enddo
+            enddo
+            
+            ! outermost unitary transform
+            call ZSLGEMM('L', 'N', this%Ndim_hop, n1, n2, this%U, this%P, arg)
+            call ZSLGEMM('R', 'C', this%Ndim_hop, n1, n2, this%U, this%P, arg)
         Endif
         
     end subroutine
@@ -101,14 +115,20 @@ contains
         class(OpT_time_dependent), intent(in) :: this
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
         Integer, intent(in) :: t
-        Integer :: n1, n2
-        
+        Integer :: n1, n2, i, j
+
         ! taken from mmthl
         n1 = size(arg,1)
         n2 = size(arg,2)
         
-        If ( this%g(t)*this%g(t) > this%Zero ) then
-
+        If ( DBLE(log(this%expg(t)) * Conjg(log(this%expg(t)))) > this%Zero ) then
+            call ZSLGEMM('R', 'N', this%Ndim_hop, n1, n2, this%U, this%P, arg)
+            do i = 1, n1
+                do j = 1, n2
+                    arg(i, j) = arg(i, j) * this%expg(j)
+                enddo
+            enddo
+            call ZSLGEMM('R', 'C', this%Ndim_hop, n1, n2, this%U, this%P, arg)
         Endif
 
     end subroutine
@@ -117,14 +137,20 @@ contains
         class(OpT_time_dependent), intent(in) :: this
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
         Integer, intent(in) :: t
-        Integer :: n1, n2
+        Integer :: n1, n2, i, j
         
         ! taken from mmthl_m1
         n1 = size(arg,1)
         n2 = size(arg,2)
         
-        If ( this%g(t)*this%g(t) > this%Zero ) then
-
+        If ( DBLE(log(this%expg(t)) * Conjg(log(this%expg(t)))) > this%Zero ) then
+            call ZSLGEMM('R', 'N', this%Ndim_hop, n1, n2, this%U, this%P, arg)
+            do i = 1, n1
+                do j = 1, n2
+                    arg(i, j) = arg(i, j) / this%expg(j)
+                enddo
+            enddo
+            call ZSLGEMM('R', 'C', this%Ndim_hop, n1, n2, this%U, this%P, arg)
         Endif
 
     end subroutine
@@ -133,14 +159,20 @@ contains
         class(OpT_time_dependent), intent(in) :: this
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
         Integer, intent(in) :: t
-        integer :: n1, n2
+        integer :: n1, n2, i, j
         
         ! taken from mmthr
         n1 = size(arg,1)
         n2 = size(arg,2)
         
-        If ( this%g(t)*this%g(t) > this%Zero ) then
-
+        If ( DBLE(log(this%expg(t)) * Conjg(log(this%expg(t)))) > this%Zero ) then
+            call ZSLGEMM('L', 'N', this%Ndim_hop, n1, n2, this%U, this%P, arg)
+            do i = 1, n1
+                do j = 1, n2
+                    arg(i, j) = arg(i, j) * this%expg(i)
+                enddo
+            enddo
+            call ZSLGEMM('L', 'C', this%Ndim_hop, n1, n2, this%U, this%P, arg)
         Endif
 
     end subroutine
@@ -149,20 +181,26 @@ contains
         class(OpT_time_dependent), intent(in) :: this
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
         Integer, intent(in) :: t
-        integer :: n1, n2
+        integer :: n1, n2, i, j
         
         n1 = size(arg,1)
         n2 = size(arg,2)
         
-        If ( this%g(t)*this%g(t) > this%Zero ) then
-
+        If ( DBLE(log(this%expg(t)) * Conjg(log(this%expg(t)))) > this%Zero ) then
+            call ZSLGEMM('L', 'N', this%Ndim_hop, n1, n2, this%U, this%P, arg)
+            do i = 1, n1
+                do j = 1, n2
+                    arg(i, j) = arg(i, j) / this%expg(i)
+                enddo
+            enddo
+            call ZSLGEMM('L', 'C', this%Ndim_hop, n1, n2, this%U, this%P, arg)
         Endif
 
     end subroutine
 
     subroutine OpT_time_dependent_dump(this)
         class(OpT_time_dependent), intent(in) :: this
-        integer :: i,j
+        integer :: i, j
 
         do i = 1, size(this%U, 1)
             write (*,*) (dble(this%U(i,j)), j = 1,size(this%U,2) )
@@ -173,8 +211,8 @@ contains
         enddo
 
         write (*,*) "------g_t--------"
-        do i = 1, size(this%g_t, 1)
-            write (*,*) this%g_t(i)
+        do i = 1, size(this%expg, 1)
+            write (*,*) this%expg(i)
         enddo
 
     end subroutine
@@ -182,7 +220,7 @@ contains
     subroutine OpT_time_dependent_dealloc(this)
         class(OpT_time_dependent), intent(inout) :: this
         
-        deallocate(this%U, this%E, this%g_t, this%P)
+        deallocate(this%U, this%E, this%expg, this%P)
     end subroutine
 
 end module OpT_time_dependent_mod
