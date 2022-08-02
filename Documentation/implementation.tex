@@ -65,6 +65,7 @@ In the code, we define a structure called \path{Operator} that makes use of the 
     \hl{\texttt{Op\_X\%O}}       & \texttt{cmplx}   &  Matrix  $\bm{O}$  of dimension $N \times N$\\
     \hl{\texttt{Op\_X\%P}}       & \texttt{int}     &  Matrix $\bm{P}$  encoded as a vector of dimension $N$\\
     \hl{\texttt{Op\_X\%g}}       & \texttt{cmplx}   &  Coupling strength $g$ \\  
+     \hl{\texttt{Op\_X\%g\_t}}       & \texttt{cmplx}   &  Time dependent coupling strength $g(\tau)$ \\  
     \hl{\texttt{Op\_X\%alpha}}   & \texttt{cmplx}   &  Constant $\alpha$ \\
     \hl{\texttt{Op\_X\%type}}    & \texttt{int}     &  Sets the type of HS transformation (1: Ising; 2: discrete\\
              &   &    HS for perfect-square term; 3: continuous real field)  \\ 
@@ -636,3 +637,6 @@ This acceleration is activated by allocating \texttt{Calc\_Fl} in \texttt{Ham\_s
 
 This symmetry allows to reconstruct one flavor, say $\bar{n}_\mathrm{fl}$, from the other, $n_\mathrm{fl}$. For unitary symmetries, the weight is given by $Z(\bar{n}_\mathrm{fl})=Z(n_\mathrm{fl})$, while anti-unitary symmetries lead to $Z(\bar{n}_\mathrm{fl})=Z(n_\mathrm{fl})^*$. This relation has to be provided by the user in  \texttt{weight\_reconstruction}. Upto entry, all weights $Z(n_\mathrm{fl})$ have be explicilty calculated by ALF and the user has to fill all `inactive' flavors $\bar{n}_\mathrm{fl}$ of the array $Z$.
 Similarly, the subroutines \texttt{GR\_reconstruction} and \texttt{GRT\_reconstruction} have to be override to provide the symmetry reconstruction of the `inactive' flavors $\bar{n}_\mathrm{fl}$ of the equal-time and time-displaced Greens-function out of $n_\mathrm{fl}$, respectively.
+
+\subsubsection{Time-dependent Hamiltonians}\label{sec:time}
+\input{time_dependence}
