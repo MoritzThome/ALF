@@ -131,11 +131,12 @@ contains
         deallocate(cmat, cinvmat)
     end subroutine
     
-    subroutine RealExpOpT_adjointaction(this, arg, t)
+    subroutine RealExpOpT_adjointaction(this, arg, t1, t2)
         class(RealExpOpT), intent(in) :: this
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
         Integer :: n1, n2
-        Integer, intent(in) :: t
+        Integer, intent(in) :: t1
+        Integer, optional, intent(in) :: t2
         
         n1 = size(arg,1)
         n2 = size(arg,2)
@@ -231,10 +232,11 @@ contains
         this%P = Op_T%P ! copy all data locally to be consistent and less error prone
     end subroutine
 
-    subroutine CmplxExpOpT_adjointaction(this, arg, t)
+    subroutine CmplxExpOpT_adjointaction(this, arg, t1, t2)
         class(CmplxExpOpT), intent(in) :: this
         Complex(kind=kind(0.D0)), intent(inout), dimension(:,:) :: arg
-        Integer, intent(in) :: t
+        Integer, intent(in) :: t1
+        Integer, optional, intent(in) :: t2
         Integer :: n1, n2
 
         n1 = size(arg,1)

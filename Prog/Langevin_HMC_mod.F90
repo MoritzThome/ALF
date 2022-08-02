@@ -154,7 +154,7 @@
            
            IF (NTAU1 .GE. LOBS_ST .AND. NTAU1 .LE. LOBS_EN .and. Calc_Obser_eq ) THEN
               If (Symm) then
-                 Call Hop_mod_Symm(GR_Tilde,GR)
+                 Call Hop_mod_Symm(GR_Tilde,GR,ntau1)
                  If (reconstruction_needed) Call ham%GR_reconstruction( GR_Tilde )
                  CALL ham%Obser( GR_Tilde, PHASE, Ntau1,Langevin_HMC%Delta_t_running )
               else

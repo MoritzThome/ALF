@@ -99,10 +99,10 @@
            NT = 0
            ! In Module Hamiltonian
            If (Symm) then
-              Call Hop_mod_Symm(G00_T,G00)
-              Call Hop_mod_Symm(GTT_T,GTT)
-              Call Hop_mod_Symm(G0T_T,G0T)
-              Call Hop_mod_Symm(GT0_T,GT0)
+              Call Hop_mod_Symm(G00_T,G00,nt)
+              Call Hop_mod_Symm(GTT_T,GTT,nt)
+              Call Hop_mod_Symm(G0T_T,G0T,nt)
+              Call Hop_mod_Symm(GT0_T,GT0,nt)
               !call reconstruction of non-calculated flavor blocks
               If (reconstruction_needed) then
                   Call ham%GR_reconstruction( G00_T )
@@ -145,10 +145,10 @@
               endif
               ! In Module Hamiltonian
               If (Symm) then
-                 Call Hop_mod_Symm(G00_T,G00)
-                 Call Hop_mod_Symm(GTT_T,GTT)
-                 Call Hop_mod_Symm(G0T_T,G0T)
-                 Call Hop_mod_Symm(GT0_T,GT0)
+                 Call Hop_mod_Symm(G00_T,G00,0)
+                 Call Hop_mod_Symm(GTT_T,GTT,nt1)
+                 Call Hop_mod_Symm(G0T_T,G0T,Ltrot,nt1)
+                 Call Hop_mod_Symm(GT0_T,GT0,nt1,Ltrot)
                  !call reconstruction of non-calculated flavor blocks
                  If (reconstruction_needed) then
                      Call ham%GR_reconstruction( G00_T )

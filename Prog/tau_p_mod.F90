@@ -130,7 +130,7 @@
            endif
            If (trim(Langevin_HMC%get_Update_scheme())=="Langevin" .and. NT .ge. LOBS_ST .and. NT .le. LOBS_EN ) then
               If (Symm) then
-                 Call Hop_mod_Symm(GTTUP_T,GTTUP)
+                 Call Hop_mod_Symm(GTTUP_T,GTTUP,nt)
                  !call reconstruction of non-calculated flavor blocks
                  If (reconstruction_needed) Call ham%GR_reconstruction( GTTUP_T )
                  CALL ham%Obser( GTTUP_T, PHASE, NT, Mc_step_weight )
@@ -169,10 +169,10 @@
         G0TUP = GRUPB
         NTAU   = 0
         If (Symm) then
-           Call Hop_mod_Symm(G00UP_T,G00UP)
-           Call Hop_mod_Symm(GTTUP_T,GTTUP)
-           Call Hop_mod_Symm(G0TUP_T,G0TUP)
-           Call Hop_mod_Symm(GT0UP_T,GT0UP)
+           Call Hop_mod_Symm(G00UP_T,G00UP,Thtrot + 1)
+           Call Hop_mod_Symm(GTTUP_T,GTTUP,Thtrot + 1)
+           Call Hop_mod_Symm(G0TUP_T,G0TUP,Thtrot + 1)
+           Call Hop_mod_Symm(GT0UP_T,GT0UP,Thtrot + 1)
            !call reconstruction of non-calculated flavor blocks
            If (reconstruction_needed) then
                Call ham%GR_reconstruction( G00UP_T )
@@ -233,10 +233,10 @@
 
            NTAU1 = NTAU + 1
            If (Symm) then
-              Call Hop_mod_Symm(G00UP_T,G00UP)
-              Call Hop_mod_Symm(GTTUP_T,GTTUP)
-              Call Hop_mod_Symm(G0TUP_T,G0TUP)
-              Call Hop_mod_Symm(GT0UP_T,GT0UP)
+              Call Hop_mod_Symm(G00UP_T,G00UP,Thtrot + 1)
+              Call Hop_mod_Symm(GTTUP_T,GTTUP,nt1)
+              Call Hop_mod_Symm(G0TUP_T,G0TUP,Thtrot + 1,nt1)
+              Call Hop_mod_Symm(GT0UP_T,GT0UP,nt1,Thtrot + 1)
               !call reconstruction of non-calculated flavor blocks
               If (reconstruction_needed) then
                   Call ham%GR_reconstruction( G00UP_T )
@@ -281,7 +281,7 @@
               Call Langevin_HMC%Wrap_Forces(GTTUP,NT1)
               If (NT1 .ge. LOBS_ST .and. NT1 .le. LOBS_EN ) Then
                  If (Symm) then
-                    Call Hop_mod_Symm(GTTUP_T,GTTUP)
+                    Call Hop_mod_Symm(GTTUP_T,GTTUP,nt1)
                     !call reconstruction of non-calculated flavor blocks
                     If (reconstruction_needed) Call ham%GR_reconstruction( GTTUP_T )
                     CALL ham%Obser( GTTUP_T, PHASE, NT1, Mc_step_weight )

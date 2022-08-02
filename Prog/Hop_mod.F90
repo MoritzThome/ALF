@@ -88,7 +88,7 @@
             
             if (op%get_g_t_alloc()) then
                 allocate(time_dependent)
-                call time_dependent%init(op,op%g_t)
+                call time_dependent%init(op,symm)
                 call ExpOpT_vec%pushback(time_dependent)
             else
                 if (Op_is_real(op)) then
@@ -276,23 +276,23 @@
 !>
 !
 !--------------------------------------------------------------------
-        Subroutine Hop_mod_Symm(Out,In)
+        Subroutine Hop_mod_Symm(Out,In,t1,t2)
 
           Implicit none
           COMPLEX (Kind=Kind(0.d0)), Dimension(:,:,:), Intent(Out):: Out
           COMPLEX (Kind=Kind(0.d0)), Dimension(:,:,:), Intent(IN):: In
+          integer, intent(in) :: t1
+          integer, optional, intent(in) :: t2
 
           Integer :: nf, nc, nf_eff
           class(ContainerElementBase), pointer :: dummy
-          Integer :: t
 
-          t = 1
           Out = In
           Do nf_eff = 1, N_FL_eff !size(In,3)
              nf=Calc_Fl_map(nf_eff)
              do nc =  Ncheck,1,-1
                 dummy => ExpOpT_vec(nf)%at(nc)
-                call dummy%adjointaction(Out(:, :, nf), t)
+                call dummy%adjointaction(Out(:, :, nf), t1,t2)
              enddo
           enddo
 

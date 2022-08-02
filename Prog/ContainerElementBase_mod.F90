@@ -133,11 +133,12 @@ module ContainerElementBase_mod
     !> @param[in] this
     !> @param[inout] the matrix that we intend to transform.
     !--------------------------------------------------------------------
-      subroutine adjointactioninterface(this, arg, t)
+      subroutine adjointactioninterface(this, arg, t1, t2)
          import ContainerElementBase
          class(ContainerElementBase), intent(in) :: this
          Complex(kind=kind(0.d0)), intent(inout), dimension(:,:) :: arg
-         Integer, intent(in) :: t
+         Integer, intent(in) :: t1
+         integer, optional, intent(in) :: t2
       end subroutine
     end interface
 end module ContainerElementBase_mod

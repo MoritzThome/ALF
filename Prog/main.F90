@@ -680,7 +680,7 @@ Program Main
                        !write(*,*) "Phase before obser : ",phase
                        Mc_step_weight = 1.d0
                        If (Symm) then
-                          Call Hop_mod_Symm(GR_Tilde,GR)
+                          Call Hop_mod_Symm(GR_Tilde,GR,ntau1)
                           !reconstruction of NOT calculated block!!!
                           If (reconstruction_needed) Call ham%GR_reconstruction( GR_Tilde )
                           CALL ham%Obser( GR_Tilde, PHASE, Ntau1, Mc_step_weight )
@@ -710,7 +710,7 @@ Program Main
                        !write(*,*) "Phase before obser : ",phase
                        Mc_step_weight = 1.d0
                        If (Symm) then
-                          Call Hop_mod_Symm(GR_Tilde,GR)
+                          Call Hop_mod_Symm(GR_Tilde,GR,ntau1)
                           !reconstruction of NOT calculated block!!!
                           If (reconstruction_needed) Call ham%GR_reconstruction( GR_Tilde )
                           CALL ham%Obser( GR_Tilde, PHASE, Ntau1, Mc_step_weight )
