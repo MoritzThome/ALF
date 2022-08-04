@@ -266,6 +266,12 @@
              Write(unit_info,*) 't             : ', Ham_T
              Write(unit_info,*) 'Ham_U         : ', Ham_U
              Write(unit_info,*) 'Ham_chem      : ', Ham_chem
+             If  (  Ham_U >=0.d0  .and.   Ham_chem   == 0.d0 )    then
+                Write(unit_info,*) 'Assuming particle hole symmetry' 
+             endif
+             If  (  Ham_U <  0.d0  )    then
+                Write(unit_info,*) 'Assuming time  reversal  symmetry' 
+             endif
              if (Projector) then
                 Do nf = 1,N_FL
                    Write(unit_info,*) 'Degen of right trial wave function: ', WF_R(nf)%Degen
@@ -276,11 +282,17 @@
 #ifdef MPI
           Endif
 #endif
-          allocate(Calc_Fl(2))
-          Calc_Fl(2)=.True.
-          Calc_Fl(1)=.False.
 
-        end Subroutine Ham_Set
+          ! Particle-hole  symmetry   for repulsive  U  only if  chemical potential vanishes
+          ! Time  reversal  symmetry  for  attractive U
+          If ( (Ham_U >= 0.d0 .and.   Ham_chem  == 0.d0)  .or.  Ham_U < 0.d0  )    then
+             allocate(Calc_Fl(N_FL))
+             Calc_Fl(2)=.True.
+             Calc_Fl(1)=.False.
+          endif
+          
+          
+        End Subroutine Ham_Set
 
 !--------------------------------------------------------------------
 !> @author
@@ -744,7 +756,7 @@
 
          nf_calc=2
          nf_reconst=1
-         weight(nf_reconst)=conjg(Weight(nf_calc))
+         weight(nf_reconst) = conjg(Weight(nf_calc))  
 
       end subroutine weight_reconstruction
 
@@ -773,10 +785,9 @@
 
          nf_calc=2
          nf_reconst=1
-         !!ATTENTION: conjg GR missing?? GR is real hear, so test won't pick it up
-         if (ham_U>0) then
-            Do I = 1,Ndim
-               Do J = 1,Ndim
+         If  (Ham_U  >= 0.d0)  then 
+            Do J = 1,Ndim
+               Do I = 1,Ndim
                   X=-1.0
                   imj = latt%imj(I,J)
                   if (mod(Latt%list(imj,1)+Latt%list(imj,2),2)==0) X=1.d0
@@ -787,13 +798,12 @@
                Enddo
             Enddo
          else
-            Do I = 1,Ndim
-               Do J = 1,Ndim
-                  GR(I,J,nf_reconst) = conjg(GR(I,J,nf_calc))
+            Do J = 1,Ndim
+               Do I = 1,Ndim
+                  GR(I,J,nf_reconst) = Conjg(GR(I,J,nf_calc))
                Enddo
             Enddo
-         endif
-
+         Endif
       end Subroutine GR_reconstruction
 
 
@@ -822,26 +832,24 @@
 
          nf_calc=2
          nf_reconst=1
-         !!ATTENTION: conjg GR missing?? GR is real hear, so test won't pick it up
-         if (ham_U>0) then
-            Do I = 1,Latt%N
-               Do J = 1,Latt%N
+         If (Ham_U >= 0.d0)  then
+            Do J = 1,Latt%N
+               Do I = 1,Latt%N
                   X=-1.0
                   imj = latt%imj(I,J)
                   if (mod(Latt%list(imj,1)+Latt%list(imj,2),2)==0) X=1.d0
-                  G0T(I,J,nf_reconst) = -X*GT0(J,I,nf_calc)
-                  GT0(I,J,nf_reconst) = -X*G0T(J,I,nf_calc)
+                  G0T(I,J,nf_reconst) = -X*conjg(GT0(J,I,nf_calc))
+                  GT0(I,J,nf_reconst) = -X*conjg(G0T(J,I,nf_calc))
                enddo
             enddo
          else
-            Do I = 1,Latt%N
-               Do J = 1,Latt%N
+            Do J = 1,Latt%N
+               Do I = 1,Latt%N
                   G0T(I,J,nf_reconst) = conjg(G0T(I,J,nf_calc))
                   GT0(I,J,nf_reconst) = conjg(GT0(I,J,nf_calc))
                enddo
             enddo
          endif
-
       end Subroutine GRT_reconstruction
 
     end submodule ham_Hubbard_Plain_Vanilla_smod
