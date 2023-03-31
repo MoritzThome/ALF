@@ -50,8 +50,9 @@ G(\sigma,s,0| \sigma,s,\tau)  = 	-(1- G(\sigma,s,0| \sigma,s,0 )) \left( \prod_{
 \begin{align}
 \prod_{\tau=\tau_1}^{\tau_2}   
 	\bm{B}_{\tau}^{(s)} = 
-	 e^{- \frac{\Delta \tau}{2} \sum_{k=1}^{M_T} g^{\bm T}_{k,\tau_2} {\bm T}^{(ks)}} \\
-	\left( \prod_{\tau=\tau_1}^{\tau_2}     \prod_{k=1}^{M_V}   e^{  \sqrt{ -\Delta \tau g^{\bm V}_{k,\tau} U_{k}} \eta_{k,\tau} {\bm V}^{(ks)} }   \prod_{k=1}^{M_I}   e^{  -\Delta \tau g^{\bm I}_{k,\tau} s_{k,\tau}  {\bm I}^{(ks)}}  
+	 e^{- \frac{\Delta \tau}{2} \sum_{k=1}^{M_T} g^{\bm T}_{k,\tau_2} {\bm T}^{(ks)}} 
+	 \prod_{\tau=\tau_1}^{\tau_2}  \left(    \prod_{k=1}^{M_V}   e^{  \sqrt{ -\Delta \tau g^{\bm V}_{k,\tau} U_{k}} \eta_{k,\tau} {\bm V}^{(ks)} }  \right. \\ 
+\left.	 \times \prod_{k=1}^{M_I}   e^{  -\Delta \tau g^{\bm I}_{k,\tau} s_{k,\tau}  {\bm I}^{(ks)}}  
 	 e^{- \frac{\Delta \tau}{2} \sum_{k=1}^{M_T} (g^{\bm T}_{k,\tau}+g^{\bm T}_{k,\tau-1}) {\bm T}^{(ks)}} \right)
 	  e^{ \frac{\Delta \tau}{2} \sum_{k=1}^{M_T} g^{\bm T}_{k,\tau_1-1} {\bm T}^{(ks)}} 
 \end{align}
