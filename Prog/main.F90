@@ -356,8 +356,28 @@ Program Main
         leap_frog_bulk = .false.
         Call ham%Ham_set()
         ! Check   array  size  for time dependent Hamiltonians
-        !!!   TODO 
-        ! 
+        N_op = Size(OP_V,1)
+        do n = 1, N_op
+            do i = 1, N_Fl
+                if (Op_V(n,i)%get_g_t_alloc()) then
+                    if (size(Op_V(n,i)%g_t,1) /= Ltrot) then
+                        write(error_unit,*) "Array size of time-dependent coupling Op_V%g_t has to be Ltrot!"
+                        CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
+                    endif
+                endif
+            enddo
+        enddo
+        do n = 1, size(Op_T,1)
+            do i = 1, N_Fl
+                if (Op_T(n,i)%get_g_t_alloc()) then
+                    if (size(Op_T(n,i)%g_t,1) /= Ltrot) then
+                        write(error_unit,*) "Array size of time-dependent coupling Op_T%g_t has to be Ltrot!"
+                        CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
+                    endif
+                endif
+            enddo
+        enddo
+         
 
         ! Test if user has initialized Calc_FL array
         If ( .not. allocated(Calc_Fl)) then
@@ -430,7 +450,6 @@ Program Main
            Call ham%Overide_global_tau_sampling_parameters(Nt_sequential_start,Nt_sequential_end,N_Global_tau)
         endif
         
-        N_op = Size(OP_V,1)
         call nsigma%make(N_op, Ltrot)
         Do n = 1,N_op
            nsigma%t(n)  = OP_V(n,1)%type
