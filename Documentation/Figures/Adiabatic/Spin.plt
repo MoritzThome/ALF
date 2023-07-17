@@ -26,7 +26,7 @@ set title "$L=4,U/t  = 4, \\Delta \\tau t = 0.0625$, Symm=.T."
 set xlabel "$ \\theta t $"
 
 plot "Spin_adiabatic.dat" u 1:2:3 w e lc rgb col8 lt 1 pt 5 t "Adiabatic", \
-     "Spin.dat"  u 1:2:3 w e lc rgb col7 lt 1 pt 7 t "Generic", \
+     "Spin.dat"  u 1:2:3 w e lc rgb col7 lt 1 pt 7 t "Hamilton", \
      "Spin_Exact.dat"  u 1:2  w l lt 1  lc rgb col6 t "Exact"
 #plot "Finite_T/Kin.dat" u (1/$1):2:3 w e lc rgb col8 lt 1 pt 5 t "Finite T", \
 #     "Proj_tt1/Kin.dat" u (1/($1*2 + 1.0)):2:3 w e lc rgb col7  lt 1 pt 7 t "t-t'", \
