@@ -34,4 +34,4 @@ plot "Spin_adiabatic.dat" u 1:2:3 w e lc rgb col8 lt 1 pt 5 t "Adiabatic", \
 unset multiplot
 set output 
 !pdflatex Spin_adiabatic.tex
-!open Spin_asdiabatic.pdf
+!open Spin_adiabatic.pdf
