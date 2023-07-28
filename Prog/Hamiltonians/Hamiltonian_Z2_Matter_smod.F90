@@ -438,7 +438,7 @@
         Real (Kind=Kind(0.d0)) function S0(n,nt,Hs_new)
           Implicit none
           Integer, Intent(IN) :: n,nt
-          Real (Kind=Kind(0.d0)), Intent(In) :: Hs_new
+          Real (Kind=Kind(0.d0)), Intent(In) :: Hs_new(2)
 
           !Local
           Integer :: nt1,I, F1,F2,I1,I2,I3,  n_orientation, n_m
@@ -538,7 +538,7 @@
           Implicit none
           Real (Kind= kind(0.d0)),INTENT(OUT) :: T0_Proposal_ratio, S0_ratio
           Integer                ,INTENT(OUT) :: Flip_list(:)
-          Real (Kind= Kind(0.d0)),INTENT(out) :: Flip_value(:)
+          Real (Kind= Kind(0.d0)),INTENT(out) :: Flip_value(:,:)
           Integer, INTENT(OUT) :: Flip_length
           Integer, INTENT(IN)    :: ntau
 
@@ -589,14 +589,14 @@
                 CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
              end select
              Flip_list(n)  = n_op
-             Flip_value(n) = nsigma%flip(n_op,ntau)
+             Call nsigma%flip(n_op,ntau,Flip_value(:,n))
           enddo
           If ( I == Latt%N )   then
              Flip_length   = 5
              n             = 5
              n_op          = Field_list(Latt%N,3,4)
              Flip_list(n)  = n_op
-             Flip_value(n) = nsigma%flip(n_op,ntau)
+             call nsigma%flip(n_op,ntau,Flip_value(:,n))
           endif
 
           If (Projector) then
@@ -638,21 +638,6 @@
           S0_ratio          =  S0_Matter
 
           Deallocate (Isigma1,Isigma2, Isigma3)
-!!$          Flip_length    = 1
-!!$          n_op = nranf(size(OP_V,1))
-!!$          Flip_list(1)   = n_op
-!!$          If ( OP_V(n_op,1)%type == 1 ) then
-!!$             ns = nsigma(n_op,ntau)
-!!$             T0_Proposal       =  1.d0 - 1.d0/(1.d0+S0(n_op,ntau)) ! No move prob
-!!$             T0_Proposal_ratio =  1.d0 / S0(n_op,ntau)
-!!$             S0_ratio          =  S0(n_op,ntau)
-!!$             Flip_value(1)     = - ns
-!!$          else
-!!$             Flip_value(1)     = NFLIPL(nsigma(n_op,ntau),nranf(3))
-!!$             T0_Proposal       = 1.d0
-!!$             T0_Proposal_ratio = 1.d0
-!!$             S0_ratio          = 1.d0
-!!$          endif
 
         end Subroutine Global_move_tau
 

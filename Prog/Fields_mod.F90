@@ -1,4 +1,4 @@
-!  Copyright (C) 2016 - 2018 The ALF project
+!  Copyright (C) 2016 - 2023 The ALF project
 !
 !  This file is part of the ALF project.
 !
@@ -49,6 +49,8 @@
 !>       \phi_{n,\tau}(\pm 2) = \pm \sqrt{2  ( 3 + \sqrt{6} ) }  \f]
 !> For  type=3 the fields, f, are real and  \f$ \gamma_{n,\tau}(f)  = 1, \phi_{n,\tau}(f) = f \f$
 !>
+!> For  type=4   is  for  multiple HS  fields  per  vertex  f = \pm 1, pm 2,  and  h  is  real    with    
+!>                        gamma = gamma(f)   and   phi = \sqrt{1 + h} eta(f)  
 !--------------------------------------------------------------------
 
 
@@ -74,7 +76,8 @@
        Real (Kind=Kind(0.d0))  :: Amplitude
 
        Type Fields
-          Real    (Kind=Kind(0.d0)), allocatable    :: f(:,:)
+          Real    (Kind=Kind(0.d0)), allocatable    :: f(:,:)          
+          Real    (Kind=Kind(0.d0)), allocatable    :: h(:,:)
           Integer                  , allocatable    :: t(:)
         CONTAINS
           procedure  :: make  => Fields_make
@@ -118,6 +121,8 @@
            Fields_Phi = Phi_st(Nint(this%f(n_op,n_tau)),2)
         case(3)
            Fields_Phi = this%f(n_op,n_tau)
+        case(4)
+           Fields_Phi = Phi_st(Nint(this%f(n_op,n_tau)),2)*sqrt( 1.d0 +  this%h(n_op,n_tau) )
         case default
            Write(error_unit,*) 'Error in Fields_Phi'
            CALL Terminate_on_error(ERROR_FIELDS,__FILE__,__LINE__)
@@ -145,6 +150,8 @@
            Fields_GAMA = GAMA_st(Nint(this%f(n_op,n_tau)),2)
         case(3)
            Fields_GAMA = 1.d0
+        case(4)
+           Fields_GAMA = GAMA_st(Nint(this%f(n_op,n_tau)),2)
         case default
            Write(error_unit,*) 'Error in Fields_GAMA'
            CALL Terminate_on_error(ERROR_FIELDS,__FILE__,__LINE__)
@@ -161,26 +168,28 @@
 !>
 !-------------------------------------------------------------------
 
-      Real (Kind=Kind(0.d0)) function Fields_flip(this,n_op,n_tau)
+      Subroutine Fields_flip(this,n_op,n_tau, HS_new)
 
         Implicit none
         Class (Fields) :: this
-        Integer, INTENT(IN) ::  n_op, n_tau
+        Integer, INTENT(IN)                    ::  n_op, n_tau
+        Real  (Kind=Kind(0.d0))  , INTENT(out) ::  HS_new(2) 
 
+        HS_new = 0.d0
         select case (this%t(n_op))
         case(1)
-           Fields_flip = - this%f(n_op,n_tau)
+           HS_new(1) = - this%f(n_op,n_tau)
         case (2)
-           Fields_flip =   Flip_st( nint(this%f(n_op,n_tau)),nranf(3))
+           HS_new(1) =   Flip_st( nint(this%f(n_op,n_tau)),nranf(3))
         case (3)
-           Fields_flip =   this%f(n_op,n_tau) + Amplitude*( ranf_wrap() - 0.5D0)
+           HS_new(1) =   this%f(n_op,n_tau) + Amplitude*( ranf_wrap() - 0.5D0)
         case default
            Write(error_unit,*) 'Error in Fields. '
            CALL Terminate_on_error(ERROR_FIELDS,__FILE__,__LINE__)
         end select
 
-      end function Fields_Flip
-
+      end Subroutine Fields_flip
+      
 
       Integer function Fields_get_i(this,n_op,n_tau)
 
@@ -205,6 +214,7 @@
 
         !Write(6,*) "Allocating  fields: ", N_op, N_tau
         allocate (this%f(N_OP,N_tau), this%t(N_OP) )
+        Allocate (this%h(N_OP,N_tau))
 
         this%f = 0.d0;  this%t = 0
 

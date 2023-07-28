@@ -209,7 +209,7 @@ Module Global_mod
               if (  ranf_wrap() > 0.5d0 ) n_step = -isize_g
               Do I = 0,Isize-1,2*isize_g
                  do n = 0,isize_g-1
-                    List_partner(npbc_tempering(I  + n             ,Isize)) =  npbc_tempering(I +  n   + n_step,Isize)
+                    List_partner(npbc_tempering(I  + n             ,Isize)) =  npbc_tempering(I + n   + n_step ,Isize)
                     List_partner(npbc_tempering(I  + n  + n_step  , Isize)) =  npbc_tempering(I + n            ,Isize)
                  enddo
               enddo

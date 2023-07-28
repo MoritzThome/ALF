@@ -799,12 +799,12 @@
         !> Time slice
         Integer, Intent(IN) :: nt
         !> New local field on time slice nt and operator index n
-        Real (Kind=Kind(0.d0)), Intent(In) :: Hs_new
+        Real (Kind=Kind(0.d0)), Intent(In) :: Hs_new(2)
 
         Integer :: nt1,I
 
         if (Continuous) then
-           S0 = exp( (-Hs_new**2  + nsigma%f(n,nt)**2 ) /2.d0 ) 
+           S0 = exp( (-Hs_new(1)**2  + nsigma%f(n,nt)**2 ) /2.d0 ) 
         else
            S0 = 1.d0
         endif

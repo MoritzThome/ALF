@@ -101,7 +101,7 @@ Contains
     !Local 
     Integer :: nf, nf_eff, N_Type, NTAU1,n, m
     Complex (Kind=Kind(0.d0)) :: Prev_Ratiotot
-    Real    (Kind=Kind(0.d0)) :: T0_proposal,  T0_Proposal_ratio,  S0_ratio, spin, HS_new
+    Real    (Kind=Kind(0.d0)) :: T0_proposal,  T0_Proposal_ratio,  S0_ratio, spin, HS_new(2)
     Character (Len=64)        :: Mode
     Logical                   :: Acc, toggle1
     
@@ -122,8 +122,8 @@ Contains
        nf = 1
        T0_proposal       = 1.5D0
        T0_Proposal_ratio = 1.D0
-       Hs_new            = nsigma%flip(n,ntau1) 
-       S0_ratio          = ham%S0(n,ntau1, Hs_New)
+       Call  nsigma%flip(n,ntau1,Hs_new) 
+       S0_ratio          = ham%S0(n,ntau1, Hs_New )
        if ( Propose_S0 ) then
           If ( Op_V(n,nf)%type == 1)  then
              T0_proposal       = 1.d0 - 1.d0/(1.d0+S0_ratio)
@@ -182,7 +182,7 @@ Contains
     ! Local
     Integer :: nf, nf_eff, N_Type, n, m
     Complex (Kind=Kind(0.d0)) :: Prev_Ratiotot
-    Real    (Kind=Kind(0.d0)) :: T0_proposal,  T0_Proposal_ratio,  S0_ratio, spin, HS_new
+    Real    (Kind=Kind(0.d0)) :: T0_proposal,  T0_Proposal_ratio,  S0_ratio, spin, HS_new(2)
     Character (Len=64)        :: Mode
     Logical                   :: Acc, toggle1
 
@@ -207,7 +207,7 @@ Contains
        nf = 1
        T0_proposal       = 1.5D0
        T0_Proposal_ratio = 1.D0
-       Hs_new            =  nsigma%flip(n,ntau) 
+       Call  nsigma%flip(n,ntau,Hs_new) 
        S0_ratio          = ham%S0(n,ntau,Hs_new)
        if ( Propose_S0 ) then
           If ( Op_V(n,nf)%type == 1)  then
@@ -354,15 +354,15 @@ Contains
 
     ! Space for local variables
     Integer                   :: n, Flip_length, nf, nf_eff, N_Type, ng_c, Flip_count
-    Real    (Kind=Kind(0.d0)) :: T0_Proposal_ratio, T0_proposal,S0_ratio, HS_new, spin
+    Real    (Kind=Kind(0.d0)) :: T0_Proposal_ratio, T0_proposal,S0_ratio, HS_new(2), spin
     COMPLEX (Kind=Kind(0.d0)) :: Prev_Ratiotot 
     Logical                   :: Acc
     Character (Len=64)        :: Mode
     Integer,      allocatable :: Flip_list(:)
-    Real    (Kind=Kind(0.d0)), allocatable :: Flip_value(:), Flip_value_st(:)
+    Real    (Kind=Kind(0.d0)), allocatable :: Flip_value(:,:), Flip_value_st(:,:)
     Real    (Kind=Kind(0.d0)) :: Zero = 10D-8
 
-    Allocate ( Flip_list(Size(Op_V,1)), Flip_value(Size(Op_V,1)), Flip_value_st(Size(Op_V,1)) )
+    Allocate ( Flip_list(Size(Op_V,1)), Flip_value(Size(Op_V,1),2), Flip_value_st(Size(Op_V,1),2) )
 
     Do ng_c = 1,N_Global_tau
        ! New configuration
@@ -373,7 +373,8 @@ Contains
           Call wrapgr_sort(Flip_length,Flip_list,Flip_value)
           If ( Flip_length > 1 ) then
              Do Flip_count = 1, Flip_length-1 
-                Flip_value_st(Flip_count)  = nsigma%f( Flip_list(Flip_count), ntau  )
+                Flip_value_st(Flip_count,1)  = nsigma%f( Flip_list(Flip_count), ntau  )
+                Flip_value_st(Flip_count,2)  = nsigma%h( Flip_list(Flip_count), ntau  )
              Enddo
           endif
           Prev_Ratiotot = cmplx(1.d0,0.d0,kind(0.d0))
@@ -386,14 +387,18 @@ Contains
              If ( Flip_count == 1 .and. Flip_length > 1 ) GR_st = Gr
              Do nf_eff = 1, N_FL_eff
                 nf=Calc_Fl_map(nf_eff)
-                spin = nsigma%f(n,ntau) 
+                if  ( nsigma%t(n) <= 2)  then
+                   spin = nsigma%f(n,ntau)
+                else
+                   spin = nsigma%phi(n,ntau)
+                endif
                 N_type = 1
                 Call Op_Wrapup(Gr(:,:,nf),Op_V(n,nf),spin,Ndim,N_Type,ntau)
              enddo
              nf = 1
              If (Flip_count <  Flip_length)  then 
                 mode = "Intermediate"
-                HS_new = Flip_value(Flip_count)
+                HS_new(:) = Flip_value(Flip_count,:)
                 Call Upgrade2(GR,n,ntau,PHASE, HS_new , &
                      &        Prev_Ratiotot, S0_ratio, T0_Proposal_ratio, Acc, mode ) 
                 do nf_eff = 1,N_FL_eff
@@ -404,7 +409,7 @@ Contains
              else
                 !Write(6,*)  "Call Up mode final", n,ntau
                 mode = "Final"
-                HS_new = Flip_value(Flip_count)
+                HS_new(:) = Flip_value(Flip_count,:)
                 Call Upgrade2(GR,n,ntau,PHASE,HS_new, &
                      &        Prev_Ratiotot, S0_ratio, T0_Proposal_ratio, Acc, mode ) 
                 !Write(6,*)  "Back from up mode final", n,ntau
@@ -421,7 +426,8 @@ Contains
              Gr = Gr_st
              m = Flip_list(1) - 1
              Do Flip_count = 1, Flip_length-1 
-                nsigma%f( Flip_list(Flip_count), ntau  ) = Flip_value_st(Flip_count)
+                nsigma%f( Flip_list(Flip_count), ntau  ) = Flip_value_st(Flip_count,1)
+                nsigma%h( Flip_list(Flip_count), ntau  ) = Flip_value_st(Flip_count,2)
              Enddo
           Endif
           !If (Acc) Call Hamiltonian_Print(Ntau)
@@ -439,13 +445,15 @@ Contains
     ! Arguments
     Integer, INTENT(IN) :: Flip_length
     Integer, INTENT(INOUT), allocatable :: Flip_list(:)
-    Real   (Kind=Kind(0.d0)), INTENT(INOUT), allocatable :: Flip_value(:)
+    Real   (Kind=Kind(0.d0)), INTENT(INOUT), allocatable :: Flip_value(:,:)
     
     ! Local
     integer :: swaps            ! number of swaps made in one pass
     integer :: nc               ! loop variable
-    integer :: temp             ! temporary holder for making swap
+    integer :: temp, n          ! temporary holder for making swap
     Real (Kind=Kind(0.d0))      :: X
+
+    
     if ( Flip_length == 1 ) return 
     
     !Write(6,*) 'Before sort'
@@ -460,9 +468,11 @@ Contains
              temp              = Flip_list(nc  ) 
              Flip_list(nc)     = Flip_list(nc+1) 
              Flip_list(nc+1)   = temp
-             X                 = Flip_value(nc  ) 
-             Flip_value(nc)    = Flip_value(nc+1) 
-             Flip_value(nc+1)  = X
+             do n = 1,2 
+                X                   = Flip_value(nc  ,n ) 
+                Flip_value(nc,n)    = Flip_value(nc+1,n ) 
+                Flip_value(nc+1,n)  = X
+             enddo
              swaps             = swaps + 1
           end if
        end do
