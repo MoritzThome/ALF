@@ -1,5 +1,5 @@
 ! compile with
-! gfortran -Wall -std=f2003 -I ../../../Prog_8/  -I ../../../Libraries/Modules/ -L ../../../Libraries/Modules/ main.F90 ../../../Prog_8/Operator.o ../../../Libraries/Modules/modules_90.a -llapack -lblas ../../../Libraries/MyNag/libnag.a
+!gfortran -std=f2003 -I ../../Prog/ -I ../../Libraries/Modules/ -L ../../Libraries/Modules/  13-Op-Wrapup.F90 ../../Prog/Operator_mod.o ../../Prog/Fields_mod.o ../../Libraries/Modules/modules_90.a -llapack -lblas
 !
 Program Wrapup
 !
@@ -13,13 +13,13 @@ Program Wrapup
             Use Operator_mod
             Type (Operator), Intent (In) :: Op
             Complex (Kind=kind(0.D0)), allocatable, Intent (Inout) :: Mat (:, :)
-            Real (Kind=kind(0.D0)), Intent (In) :: spin
+            Complex (Kind=kind(0.D0)), Intent (In) :: spin
             Integer, Intent (In) :: N_Type, Ndim
          End Subroutine
       End Interface
 !
       Complex (Kind=Kind(0.D0)) :: Zre, Zim
-      Real (Kind=Kind(0.D0)) :: spin
+      Complex (Kind=Kind(0.D0)) :: spin
       Complex (Kind=Kind(0.D0)), Dimension (:, :), Allocatable :: VH, &
      & matnew, matold
       Integer :: i, n, j, Ndim, N_Type, opn, nt
@@ -107,7 +107,7 @@ Subroutine Op_WrapupFFA (Mat, Op, spin, Ndim, N_Type)
       Integer, Intent (In) :: Ndim
       Type (Operator), Intent (In) :: Op
       Complex (Kind=kind(0.D0)), allocatable, Intent (Inout) :: Mat (:, :)
-      Real (Kind=kind(0.D0)), Intent (In) :: spin
+      Complex (Kind=kind(0.D0)), Intent (In) :: spin
       Integer, Intent (In) :: N_Type
 !
     ! Local
@@ -128,7 +128,7 @@ Subroutine Op_WrapupFFA (Mat, Op, spin, Ndim, N_Type)
          VH = 0.D0
          Do n = 1, Op%n
             Z = CMPLX (1.d0, 0.d0, kind(0.D0))
-            If (n <= Op%N_non_Zero) Z = Exp (-Op%g*CMPLX(Op%E(n)*spin, &
+            If (n <= Op%N_non_Zero) Z = Exp (-Op%g*CMPLX(Op%E(n)*Real(spin,kind(0.d0)), &
            & 0.d0, kind(0.D0)))
             Do m = 1, Op%n
                Z1 = Op%U (m, n) * Z
@@ -146,7 +146,7 @@ Subroutine Op_WrapupFFA (Mat, Op, spin, Ndim, N_Type)
          VH = 0.D0
          Do n = 1, Op%n
             Z = CMPLX (1.d0, 0.d0, kind(0.D0))
-            If (n <= Op%N_non_Zero) Z = Exp (Op%g*CMPLX(Op%E(n)*spin, &
+            If (n <= Op%N_non_Zero) Z = Exp (Op%g*CMPLX(Op%E(n)*Real(spin,kind(0.d0)), &
            & 0.d0, kind(0.D0)))
             Do m = 1, Op%n
                Z1 = Z * conjg (Op%U(m, n))
