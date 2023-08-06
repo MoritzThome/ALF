@@ -106,7 +106,7 @@
 !>
 !-------------------------------------------------------------------
 
-      Real (Kind=Kind(0.d0)) function  Fields_Phi(this,n_op,n_tau)
+      Complex (Kind=Kind(0.d0)) function  Fields_Phi(this,n_op,n_tau)
 
         Implicit none
         Class (Fields) :: this

@@ -715,11 +715,11 @@ Module Global_mod
               !X = X + nsigma%Phi(i,nt) - nsigma_old%Phi(i,nt)
               Do nf_eff = 1,N_FL_eff
                  nf=Calc_Fl_map(nf_eff)
-                 X =  nsigma%Phi(i,nt) - nsigma_old%Phi(i,nt)
+                 Z =  nsigma%Phi(i,nt) - nsigma_old%Phi(i,nt)
                  g_loc = Op_V(i,nf)%g
                  if ( Op_V(i,nf)%get_g_t_alloc()) g_loc = Op_V(i,nf)%g_t(nt)
                  !Z = Z * exp(cmplx( X*Real(N_SUN,Kind(0.d0)), 0.d0,kind(0.d0)) * Op_V(i,nf)%g * Op_V(i,nf)%alpha )
-                 Ratio_1_array(nf) = Ratio_1_array(nf) * exp(cmplx( X*Real(N_SUN,Kind(0.d0)), 0.d0,kind(0.d0)) * g_loc * Op_V(i,nf)%alpha )
+                 Ratio_1_array(nf) = Ratio_1_array(nf) * exp(Z*cmplx( Real(N_SUN,Kind(0.d0)), 0.d0,kind(0.d0)) * g_loc * Op_V(i,nf)%alpha )
               Enddo
            Enddo
         Enddo

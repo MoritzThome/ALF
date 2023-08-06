@@ -169,7 +169,7 @@ Contains
        do nt = 1,size(nsigma%f,2)
           g_loc = Op_V(n,nf)%g
           if (op_v(n,nf)%g_t_alloc) g_loc = Op_V(n,nf)%g_t(nt)
-          angle = Aimag( g_loc * Op_V(n,nf)%alpha ) * nsigma%Phi(n,nt)
+          angle = Aimag( g_loc * Op_V(n,nf)%alpha * nsigma%Phi(n,nt) )
           Phase = Phase*CMPLX(cos(angle),sin(angle), Kind(0.D0))
        enddo
     enddo
