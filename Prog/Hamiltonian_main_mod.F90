@@ -24,7 +24,7 @@
 !     - We require the preservation of the above copyright notice and this license in all original files.
 !
 !     - We prohibit the misrepresentation of the origin of the original source files. To obtain
-!       the original source files please visit the homepage http://alf.physik.uni-wuerzburg.de .
+!       the original source files please visit the homepage http://alf.physik.uni-wuerzburg.de 
 !
 !     - If you make substantial changes to the program we require you to either consider contributing
 !       to the ALF project or to mark your material in a reasonable way as different from the original version
@@ -588,7 +588,7 @@
           Subroutine  Hamiltonian_set_nsigma_base(Initial_field)
              Implicit none
 
-             Real (Kind=Kind(0.d0)), allocatable, dimension(:,:), Intent(INOUT) :: Initial_field
+             Complex (Kind=Kind(0.d0)), allocatable, dimension(:,:), Intent(INOUT) :: Initial_field
 
              !  Consider  when we implement  different debugging  levels
 !!$             write(output_unit,*)

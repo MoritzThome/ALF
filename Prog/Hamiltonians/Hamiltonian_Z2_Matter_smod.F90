@@ -1208,7 +1208,7 @@
 
         Implicit none
 
-        Real (Kind=Kind(0.d0)), allocatable, dimension(:,:), Intent(INOUT) :: Initial_field
+        Complex (Kind=Kind(0.d0)), allocatable, dimension(:,:), Intent(INOUT) :: Initial_field
 
         ! Local
         Integer :: I,nc, I1, nt, n_orientation, N_ops
@@ -1225,8 +1225,8 @@
            do nt = 1,Ltrot
               do I = 1,Latt%N
                  nc = Field_list(I,3,3)
-                 Initial_field(nc,nt) = 1.D0
-                 if ( ranf_wrap()  > 0.5D0 ) Initial_field(nc,nt)  = -1.D0
+                 Initial_field(nc,nt) = cmplx(1.D0, 0.d0,Kind(0.d0))
+                 if ( ranf_wrap()  > 0.5D0 ) Initial_field(nc,nt)  = cmplx(-1.D0,0.d0,Kind(0.d0))
               enddo
            enddo
         endif
@@ -1235,11 +1235,11 @@
            Do nt = 1,Ltrot
               Do I = 1, Latt%N
                  if (mod( Latt%list(i,1) + latt%list(i,2), 2 ) == 0 ) then
-                    Initial_field(Field_list(I,1,1),nt) =  1.d0
-                    Initial_field(Field_list(I,2,1),nt) = -1.d0
+                    Initial_field(Field_list(I,1,1),nt) =  cmplx( 1.d0, 0.d0, Kind(0.d0))
+                    Initial_field(Field_list(I,2,1),nt) =  cmplx(-1.d0, 0.d0, Kind(0.d0))
                  else
-                    Initial_field(Field_list(I,1,1),nt) =  1.d0
-                    Initial_field(Field_list(I,2,1),nt) =  1.d0
+                    Initial_field(Field_list(I,1,1),nt) =  cmplx(1.d0, 0.d0, Kind(0.d0))
+                    Initial_field(Field_list(I,2,1),nt) =  cmplx(1.d0, 0.d0, Kind(0.d0))
                  endif
               Enddo
            Enddo
@@ -1255,10 +1255,10 @@
                     nc = Field_list(I,n_orientation,2)
                     if (  n_orientation == 1 )  I1 = latt%nnlist(I,1,0)
                     if (  n_orientation == 2 )  I1 = latt%nnlist(I,0,1)
-                    Initial_field(nc,nt) = real(Isigma(I)*Isigma(I1), kind(0.d0))
+                    Initial_field(nc,nt) = cmplx(real(Isigma(I)*Isigma(I1), kind(0.d0)),0.d0,Kind(0.d0))
                  enddo
               Enddo
-              Initial_field(Field_list(Latt%N,3,4),nt) = real(Isigma(Latt%N), kind(0.d0))
+              Initial_field(Field_list(Latt%N,3,4),nt) = cmplx(real(Isigma(Latt%N), kind(0.d0)),0.d0,Kind(0.d0))
               do nc = 1,size(Initial_field,1)
                  nsigma%f(nc,nt) = Initial_field(nc,nt)
               enddo

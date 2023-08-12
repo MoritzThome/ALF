@@ -144,6 +144,7 @@
         procedure, nopass :: GR_reconstruction
         procedure, nopass :: GRT_reconstruction
         procedure, nopass :: S0
+        procedure, nopass :: Hamiltonian_set_nsigma
         ! procedure, nopass :: ##PROCEDURE_NAME##  ! Some other procedure defined in ham_base
 #ifdef HDF5
         procedure, nopass :: write_parameters_hdf5
@@ -849,5 +850,55 @@
            enddo
          enddo
        end Subroutine GRT_reconstruction
+
+!--------------------------------------------------------------------
+!> @author
+!> ALF Collaboration
+!>
+!> @brief
+!> The user can set the initial field.
+!>
+!> @details
+!> @param[OUT] Initial_field Real(:,:)
+!> \verbatim
+!>  Upon entry Initial_field is not allocated. If alloacted then it will contain the
+!>  the initial field
+!> \endverbatim
+!--------------------------------------------------------------------
+          Subroutine  Hamiltonian_set_nsigma(Initial_field)
+             Implicit none
+
+             Complex (Kind=Kind(0.d0)), allocatable, dimension(:,:), Intent(INOUT) :: Initial_field
+
+             Integer ::  N_op,  nt, n_op,  nc  ,  I, no
+             Logical ::  Test_Dimer  =.False. 
+
+             If  (Test_Dimer)  then 
+                N_op  = Size(Op_V,1)
+                Allocate ( Initial_field(N_op,Ltrot) )
+                
+                Initial_field  =  cmplx(0.d0,0.d0,kind(0.d0)) 
+                do no  = 1,N_op
+                   do nt = 1,Ltrot
+                      Initial_field(no,nt)  =  cmplx(1.d0,0.d0,kind(0.d0))
+                      If  (ranf_wrap() > 0.5d0)  Initial_field(no,nt)   =  cmplx(-1.d0,0.d0,kind(0.d0))
+                   enddo
+                enddo
+                
+                Do  I  =  1,L1
+                   nc = Listb(I,1)
+                   If  (mod(I,2)  == 0 )  then 
+                      do  nt  = 1,Ltrot
+                         Initial_field(nc,nt)  =   Initial_field(nc,nt)  + cmplx(0.d0, 1.d0,kind(0.d0))
+                      enddo
+                   else
+                      do  nt  = 1,Ltrot
+                         Initial_field(nc,nt)  =   Initial_field(nc,nt)  + cmplx(0.d0,-1.d0,kind(0.d0))
+                      enddo
+                   endif
+                enddo
+             endif
+             
+           end Subroutine Hamiltonian_set_nsigma
         
       end submodule ham_Spin_Peierls_smod

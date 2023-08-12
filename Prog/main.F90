@@ -158,7 +158,7 @@ Program Main
         Real(Kind=Kind(0.d0)) :: CPU_MAX
         Character (len=64) :: file_seeds, file_para, file_dat, file_info, ham_name
         Integer :: Seed_in
-        Real (Kind=Kind(0.d0)) , allocatable, dimension(:,:) :: Initial_field
+        Complex (Kind=Kind(0.d0)) , allocatable, dimension(:,:) :: Initial_field
 
         ! Space for choosing sampling scheme
         Logical :: Propose_S0, Tempering_calc_det
