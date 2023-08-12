@@ -1,5 +1,5 @@
 ! compile with
-! gfortran -std=f2003  -I ../../../Libraries/Modules/ -L ../../../Libraries/Modules/ main.F90 ../../../Prog_8/Operator.o ../../../Libraries/Modules/modules_90.a -llapack -lblas ../../../Libraries/MyNag/libnag.a
+!gfortran -std=f2003 -I ../../Prog/ -I ../../Libraries/Modules/ -L ../../Libraries/Modules/ 10-Op-mmultL.F90  ../../Prog/Operator_mod.o ../../Prog/Fields_mod.o ../../Libraries/Modules/modules_90.a -llapack -lblas
 
 Program OPMULTTEST
 
@@ -9,7 +9,7 @@ Program OPMULTTEST
       implicit none
       
       Complex (Kind=Kind(0.D0)) :: Matnew(3,3), matold(3,3), VH(3,3), Z, Z1, Zre, Zim
-      Real (KIND = KIND(0.D0)) :: spin
+      Complex (KIND = KIND(0.D0)) :: spin
       Integer :: i, n, m, j, ndim 
       Type(Operator) :: Op
       Type (Fields)  :: nsigma_single
@@ -34,7 +34,7 @@ Program OPMULTTEST
       Op%g = 0.02D0
       call Op_set(Op)
       nsigma_single%t(1)   = 2
-      nsigma_single%f(1,1) = real(1,kind=kind(0.d0))
+      nsigma_single%f(1,1) = cmplx(real(1,kind=kind(0.d0)), 0.d0, kind(0.d0))
 
       
       

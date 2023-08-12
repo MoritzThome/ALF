@@ -9,7 +9,7 @@ Program Opmulttest
         implicit none
 
         Complex (Kind=Kind(0.D0)) :: Matnew(3,3), matold(3,3), VH(3,3), Z, Z1, Zre, Zim, nspin
-        Real    (KIND = KIND(0.D0)) :: spin
+        Complex    (KIND = KIND(0.D0)) :: spin
         Integer :: i, n, m, j, ndim , nt
         Type(Operator) :: Op
         Type (Fields) :: nsigma_single
