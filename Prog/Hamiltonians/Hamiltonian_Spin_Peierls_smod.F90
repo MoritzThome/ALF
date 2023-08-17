@@ -303,6 +303,11 @@
              CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
           endif
 
+          If  (.not.SU2_Symm)  then
+             write(error_unit,*)   " SU(2)  spin  symmetry is   required  "
+             CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
+          endif
+
           ! Use  particle-hole  symmetry between the two flavors
           If  (.not. SU2_symm )    then
              allocate(Calc_Fl(N_FL))
@@ -349,20 +354,33 @@
 
           Integer :: nf, n 
           Real (Kind=Kind(0.d0)):: X
-          
-          allocate(Op_T(Ndim,N_FL))
-          Do nf = 1,N_FL
-             x = -1.d0
-             If  (nf == 1)  x = 1.d0
-             do n = 1,Ndim 
-                Call Op_make(Op_T(n,nf),1)
-                Op_T(n,nf)%P(1)   = n
-                Op_T(n,nf)%O(1,1) = cmplx(1.d0,0.d0, kind(0.D0)) 
-                Op_T(n,nf)%g      = dtau*x*ham_g_factor*ham_h
-                Call Op_set( Op_T(n,nf) )
+
+
+          if  (SU2_Symm)   then
+             allocate(Op_T(1,N_FL))
+             Do nf = 1,N_FL
+                x = -1.d0
+                If  (nf == 1)  x = 1.d0
+                Call Op_make(Op_T(1,nf),1)
+                Op_T(n,nf)%P(1)   = 1
+                Op_T(n,nf)%O(1,1) = cmplx(1.d0,0.d0,kind(0.D0)) 
+                Op_T(n,nf)%g      = cmplx(0.d0,0.d0,kind(0.d0))
+                Call Op_set( Op_T(1,nf) )
              enddo
-          enddo
-          
+          else
+             allocate(Op_T(Ndim,N_FL))
+             Do nf = 1,N_FL
+                x = -1.d0
+                If  (nf == 1)  x = 1.d0
+                do n = 1,Ndim 
+                   Call Op_make(Op_T(n,nf),1)
+                   Op_T(n,nf)%P(1)   = n
+                   Op_T(n,nf)%O(1,1) = cmplx(1.d0,0.d0, kind(0.D0)) 
+                   Op_T(n,nf)%g      = dtau*x*ham_g_factor*ham_h
+                   Call Op_set( Op_T(n,nf) )
+                enddo
+             enddo
+          endif
         end Subroutine Ham_Hop
 !--------------------------------------------------------------------
 !> @author 
@@ -376,34 +394,34 @@
           Use Predefined_Int
           Implicit none 
           
-          Integer :: nf, I, I1, I2,  nc, nc1,  J, N_op 
+          Integer :: nf, I, I1, I2,  nc, nc1,  J, N_op,  Ix, Iy
           Integer :: n, nst,nen, n_fam, no  
-          Real (Kind=Kind(0.d0)) :: X,  J_Heis
+          Real (Kind=Kind(0.d0)) :: X,  J_Heis, X_p(2) 
 
 
 
           If  ( L2 ==  1 )  then
-             N_op =  Latt%N   +  L1 
+             N_op =  Latt%N   +    L1*Latt_Unit%N_coord
              N_fam = 2
           else
-             N_op =  Latt%N  +  L1 +  L2 
+             N_op =  Latt%N  +  L1*L2*Latt_unit%N_coord
              N_fam = 4
           endif
           Allocate(Op_V(N_op,N_FL))
           do nf = 1,N_FL
              nc = 0
-             do i  = 1, Latt%N * Latt_Unit%Norb
+             do i  = 1, Latt%N 
                 nc = nc + 1
                 Call Op_make(Op_V(nc,nf),1)
              enddo
-             do i  = Latt%N * Latt_Unit%Norb + 1, N_op
+             do i  = Latt%N  + 1, N_op
                 nc = nc + 1
                 Call Op_make(Op_V(nc,nf),2)
              enddo
           enddo
           do nf = 1,N_FL
              nc = 0
-             do I  = 1, Latt%N * Latt_Unit%Norb
+             do I  = 1, Latt%N 
                 nc = nc + 1
                 !Call Predefined_Int_U_SUN( OP_V(nc,nf), I, N_SUN, DTAU, Ham_U  )
                 Op_V(nc,nf)%P(1) = I
@@ -413,7 +431,7 @@
                 Op_V(nc,nf)%type   = 2
                 Call Op_set( Op_V(nc,nf) )
              Enddo
-             do n = 1,n_Fam
+             do n = 1,N_Fam
                 Select case (n)
                 case(1)
                    nst = 1;  nen = L1; J_heis=Ham_Jx;  no = 1
@@ -424,21 +442,25 @@
                 case(4)
                    nst = 2;  nen = L2; J_heis=Ham_Jy;  no = 2  
                 end Select
-                Do I = nst,nen,2
-                   nc = nc + 1
-                   I1 = Invlist(            I     ,1)
-                   If (no == 1) I2 = Invlist(Latt%nnlist(I,1,0),1)
-                   If (no == 2) I2 = Invlist(Latt%nnlist(I,0,1),1)
-                   !Call Predefined_Int_V_SUN( OP_V(nc,nf), I1, I2, 1, DTAU, J_Heis/4.d0  )
-                   Op_V(nc,nf)%P(1) = I1
-                   Op_V(nc,nf)%P(2) = I2
-                   Op_V(nc,nf)%O(1,2) = cmplx(1.d0 ,0.d0, kind(0.D0)) 
-                   Op_V(nc,nf)%O(2,1) = cmplx(1.d0 ,0.d0, kind(0.D0))
-                   Op_V(nc,nf)%g     = SQRT(CMPLX(DTAU*J_heis/4.d0, 0.D0, kind(0.D0))) 
-                   Op_V(nc,nf)%alpha = cmplx(0.d0, 0.d0, kind(0.D0))
-                   Op_V(nc,nf)%type  = 4
-                   Call Op_set( Op_V(nc,nf) )
-                   Listb(I,no)  =  nc 
+                Do Ix = nst,nen,2
+                   do  Iy  = 1,L2
+                      x_p  = dble(Ix)*latt%a1_p   +  dble(Iy)*Latt%a2_p
+                      I =  Inv_R(x_p, Latt) 
+                      nc = nc + 1
+                      I1 = Invlist(            I     ,1)
+                      If (no == 1) I2 = Invlist(Latt%nnlist(I,1,0),1)
+                      If (no == 2) I2 = Invlist(Latt%nnlist(I,0,1),1)
+                      !Call Predefined_Int_V_SUN( OP_V(nc,nf), I1, I2, 1, DTAU, J_Heis/4.d0  )
+                      Op_V(nc,nf)%P(1) = I1
+                      Op_V(nc,nf)%P(2) = I2
+                      Op_V(nc,nf)%O(1,2) = cmplx(1.d0 ,0.d0, kind(0.D0)) 
+                      Op_V(nc,nf)%O(2,1) = cmplx(1.d0 ,0.d0, kind(0.D0))
+                      Op_V(nc,nf)%g     = SQRT(CMPLX(DTAU*J_heis/4.d0, 0.D0, kind(0.D0))) 
+                      Op_V(nc,nf)%alpha = cmplx(0.d0, 0.d0, kind(0.D0))
+                      Op_V(nc,nf)%type  = 4
+                      Call Op_set( Op_V(nc,nf) )
+                      Listb(I,no)  =  nc 
+                   enddo
                 enddo
              enddo
           enddo
