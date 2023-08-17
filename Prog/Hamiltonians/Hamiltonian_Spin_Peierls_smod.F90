@@ -438,12 +438,12 @@
                 case(2)
                    nst = 2;  nen = L1; J_heis=Ham_Jx;  no = 1
                 case(3)
-                   nst = 1;  nen = L2; J_heis=Ham_Jy;  no = 2
+                   nst = 1;  nen = L1; J_heis=Ham_Jy;  no = 2
                 case(4)
-                   nst = 2;  nen = L2; J_heis=Ham_Jy;  no = 2  
+                   nst = 2;  nen = L1; J_heis=Ham_Jy;  no = 2  
                 end Select
                 Do Ix = nst,nen,2
-                   do  Iy  = 1,L2
+                   do Iy  = 1,L2
                       x_p  = dble(Ix)*latt%a1_p   +  dble(Iy)*Latt%a2_p
                       I =  Inv_R(x_p, Latt) 
                       nc = nc + 1
