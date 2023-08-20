@@ -191,8 +191,8 @@
 
       Logical  ::   SU2_Symm =.false.
       Real (Kind=Kind(0.d0))  ::  Ham_M,  Ham_k
-      Integer, allocatable  ::   listb(:,:)
-      ! listb(i:1...LQ,1,N_coord)  
+      Integer, allocatable  ::   listb(:,:),  invlistb(:,:) 
+      ! listb(i:1...LQ,1,N_coord) 
 
     contains
       
@@ -334,7 +334,6 @@
 
           Call  Predefined_Latt(Lattice_type, L1, L2, Ndim, List, Invlist, Latt, Latt_Unit )
 
-          Allocate (Listb(Latt%N,Latt_Unit%N_coord))
           Latt1_unit%Norb = Latt_Unit%N_coord
           Allocate (Latt1_unit%Orb_pos_p(2,2))
           Latt1_unit%Orb_pos_p = 0.d0
@@ -407,6 +406,8 @@
              N_op =  Latt%N  +  L1*L2*Latt_unit%N_coord
              N_fam = 4
           endif
+          Allocate (Listb(Latt%N,Latt_Unit%N_coord), Invlistb(N_op,2))
+
           Allocate(Op_V(N_op,N_FL))
           do nf = 1,N_FL
              nc = 0
@@ -431,25 +432,20 @@
                 Op_V(nc,nf)%type   = 2
                 Call Op_set( Op_V(nc,nf) )
              Enddo
-             do n = 1,N_Fam
+             do n = 1,2
                 Select case (n)
                 case(1)
-                   nst = 1;  nen = L1; J_heis=Ham_Jx;  no = 1
+                   nst = 1;  J_heis=Ham_Jx;  no = 1
                 case(2)
-                   nst = 2;  nen = L1; J_heis=Ham_Jx;  no = 1
-                case(3)
-                   nst = 1;  nen = L1; J_heis=Ham_Jy;  no = 2
-                case(4)
-                   nst = 2;  nen = L1; J_heis=Ham_Jy;  no = 2  
+                   nst = 2;  J_heis=Ham_Jx;  no = 1
                 end Select
-                Do Ix = nst,nen,2
-                   do Iy  = 1,L2
+                Do Ix = nst, L1, 2
+                   do Iy  = 1, L2
                       x_p  = dble(Ix)*latt%a1_p   +  dble(Iy)*Latt%a2_p
                       I =  Inv_R(x_p, Latt) 
                       nc = nc + 1
                       I1 = Invlist(            I     ,1)
-                      If (no == 1) I2 = Invlist(Latt%nnlist(I,1,0),1)
-                      If (no == 2) I2 = Invlist(Latt%nnlist(I,0,1),1)
+                      I2 = Invlist(Latt%nnlist(I,1,0),1)
                       !Call Predefined_Int_V_SUN( OP_V(nc,nf), I1, I2, 1, DTAU, J_Heis/4.d0  )
                       Op_V(nc,nf)%P(1) = I1
                       Op_V(nc,nf)%P(2) = I2
@@ -459,12 +455,43 @@
                       Op_V(nc,nf)%alpha = cmplx(0.d0, 0.d0, kind(0.D0))
                       Op_V(nc,nf)%type  = 4
                       Call Op_set( Op_V(nc,nf) )
-                      Listb(I,no)  =  nc 
+                      Listb   (I,no)  =  nc
+                      Invlistb(nc,1)  =  I
+                      Invlistb(nc,2)  =  no
+                   enddo
+                enddo
+             enddo
+             do n = 3,N_Fam
+                Select case (n)
+                case(3)
+                   nst = 1;  J_heis=Ham_Jy;  no = 2
+                case(4)
+                   nst = 2;  J_heis=Ham_Jy;  no = 2  
+                end Select
+                do Ix  = 1, L1
+                   Do Iy = nst, L2, 2
+                      x_p  = dble(Ix)*latt%a1_p   +  dble(Iy)*Latt%a2_p
+                      I =  Inv_R(x_p, Latt) 
+                      nc = nc + 1
+                      I1 = Invlist(            I     ,1)
+                      I2 = Invlist(Latt%nnlist(I,0,1),1)
+                      !Call Predefined_Int_V_SUN( OP_V(nc,nf), I1, I2, 1, DTAU, J_Heis/4.d0  )
+                      Op_V(nc,nf)%P(1) = I1
+                      Op_V(nc,nf)%P(2) = I2
+                      Op_V(nc,nf)%O(1,2) = cmplx(1.d0 ,0.d0, kind(0.D0)) 
+                      Op_V(nc,nf)%O(2,1) = cmplx(1.d0 ,0.d0, kind(0.D0))
+                      Op_V(nc,nf)%g     = SQRT(CMPLX(DTAU*J_heis/4.d0, 0.D0, kind(0.D0))) 
+                      Op_V(nc,nf)%alpha = cmplx(0.d0, 0.d0, kind(0.D0))
+                      Op_V(nc,nf)%type  = 4
+                      Call Op_set( Op_V(nc,nf) )
+                      Listb   (I,no)  =  nc
+                      Invlistb(nc,1)  =  I
+                      Invlistb(nc,2)  =  no
                    enddo
                 enddo
              enddo
           enddo
-
+          
           Write(6,*) nc, n_op
         end Subroutine Ham_V
 !--------------------------------------------------------------------
@@ -488,23 +515,26 @@
           Complex (Kind=Kind(0.d0)), Intent(In) :: Hs_new
 
           ! Local
-          Real (Kind=Kind(0.d0) )  ::   S_old,  S_new
+          Real (Kind=Kind(0.d0) )  ::   S_old,  S_new,  J_Heis
           Integer                  ::   ntp1, ntm1
 
           S0 = 1.d0
           if  (nsigma%t(n) == 4 ) then
-             ntp1  = nt + 1 
+             J_Heis =  Ham_Jx
+             if  ( invlistb(n,2)   ==  2 )  J_Heis  =  Ham_Jy
+             ntp1  = nt + 1
              if ( ntp1 > Ltrot )  ntp1  =  1
              ntm1  = nt - 1 
              if ( ntm1 ==  0   )  ntm1  =  Ltrot
              
              S_old  = Ham_M * ( (aimag(nsigma%f(n,ntp1)-nsigma%f(n,nt)))**2  + (aimag(nsigma%f(n,nt)-nsigma%f(n,ntm1)))**2)/(2.d0*Dtau) + &
-                  &   Ham_k * Dtau * ( aimag(nsigma%f(n,nt)) +  Ham_Jx/(4.d0*Ham_k) ) **2/2.d0
+                  &   Ham_k * Dtau * ( aimag(nsigma%f(n,nt)) + J_Heis/(4.d0*Ham_k) ) **2/2.d0
              
              S_new  = Ham_M * ( (aimag(nsigma%f(n,ntp1)- Hs_new       ))**2  + (aimag(Hs_new        -nsigma%f(n,ntm1)))**2)/(2.d0*Dtau) + &
-                  &   Ham_k * Dtau * ( aimag(Hs_new) +  Ham_Jx/(4.d0*Ham_k) )**2/2.d0
+                  &   Ham_k * Dtau * ( aimag(Hs_new) +  J_Heis/(4.d0*Ham_k) )**2/2.d0
 
              S0     = exp(-S_new +  S_old )
+             
           endif
         end function S0
 !--------------------------------------------------------------------
