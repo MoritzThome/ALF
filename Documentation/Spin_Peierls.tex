@@ -1,0 +1,28 @@
+% Copyright (c) 2016 2023 The ALF project.
+% This is a part of the ALF project documentation.
+% The ALF project documentation by the ALF contributors is licensed
+% under a Creative Commons Attribution-ShareAlike 4.0 International License.
+% For the licensing details of the documentation see license.CCBYSA.
+% !TEX root = doc.tex 
+
+
+\subsection{ Spin  Peierls   \texttt{ Hamiltonian\_Spin\_Peierls\_smod.F90 }} \label{Spin_Peierls.Sec}
+
+The  Hamiltonian  that  we  will  consider here  is  given  by: 
+\begin{equation}
+	\hat{H}  =       \sum_{\langle  i, j \rangle }  J(j-i)    \left( 1 + \hat{Q}_{\langle  i, j \rangle} \right)   \hat{\ve{S}}_i \cdot \hat{\ve{S}}_j    +  
+	   \frac{\hat{P}_{\langle  i, j \rangle} ^2 }{2M}   +    \frac{k}{2} \hat{Q}_{\langle  i, j \rangle} ^2 
+\end{equation}
+with 
+\begin{equation}
+    \left[   \hat{S}^{\alpha}_i , \hat{S}^{\beta}_j \right]   =    \delta_{i,j}  i  \sum_{\gamma=1}^{3} \epsilon^{\alpha  \beta \gamma}  \hat{S}_{\gamma},  \, \, \, \,  
+     \left(   \hat{S}^{\alpha}_i  \right)^2  = \frac{3}{4}, \, \, \, \,  \text{and} \,  \, \, \,  \left[ \hat{P}_b,  \hat{Q}_{b'}  \right]   =   \frac{ \delta_{b,b'} } {i}.      
+\end{equation}
+The model  is  defined  on a  square lattice,  and    the  sum  runs  over  nearest  neighbor  bonds $b = \langle  i, j \rangle $.    Including  a   coupling  constant  g  in  front   the  Einstein phonon   $ \hat{Q}_{\langle  i, j \rangle} $  is  superfluous  since it can   be  set  to  unity  by  carrying out  a  
+canonical  transformation of   $ \hat{Q}_{\langle  i, j \rangle} $.     
+
+To implement  the  spin-Peierls  Hamiltonian  in the ALF  library,  we   fermionize the  spin  degrees  of   freedom  and  use  the  relation 
+\begin{equation}
+      -\frac{1}{4} \left( \sum_{\sigma}   \hat{f}^{\dagger}_{i,\sigma}  \hat{f}^{\phantom\dagger}_{j,\sigma}    + \hat{f}^{\dagger}_{j,\sigma}  \hat{f}^{\phantom\dagger}_{i,\sigma}   \right)^2  +  \frac{1}{4}     =   \hat{\ve{S}}_i \cdot \hat{\ve{S}}_j   
+\end{equation}
+that   holds  in the odd,  $ (-1)^{ \sum_{\sigma} \hat{f}^{\dagger}_{i,\sigma}  \hat{f}^{\phantom\dagger}_{i,\sigma} }  = -1 $  parity  sector.  
