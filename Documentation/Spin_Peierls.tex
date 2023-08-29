@@ -71,7 +71,11 @@ Here,   the   electron phonon interaction as  well as  the  phonon  frequency  a
 \end{equation}
 respectively.    
 
-We  have  tested  the  code  for  an  $L=16 $ chain    at  $ \beta J  = 8 $,  $\omega_0 = 0.25 $ and    various  values  of     the  electron-phonon  interaction.  As  can be seen  in   Fig.~\ref{Spin_Peierls.fig}   the  results  compare   remarkably  well  to  independent  calculations  based on the  so  called   SSE  based wormhole algorithm  \cite{Weber21a}. 
+We  have  tested  the  code  for  an  $L=16 $ chain    at  $ \beta J  = 8 $,  $\omega_0 = 0.25 $ and    various  values  of     the  electron-phonon  interaction.  As  can be seen  in   Fig.~\ref{Spin_Peierls.fig}   the  results  compare   remarkably  well  to  independent  calculations  based on the  so  called   SSE  based wormhole algorithm  \cite{Weber21a}.    The  Hamiltonian  \texttt{Hamiltonian\_Spin\_Peierls\_smod.F90}    includes  the  following  
+observables: 
+\begin{equation}
+	    S(q,\tau)    =   \frac{4}{3} \sum_{r}   e^{i q r }  \langle  \ve{S}_r(\tau)  \ve{S}_0(0) \rangle 
+\end{equation}
 
 \begin{figure}
 \center 
