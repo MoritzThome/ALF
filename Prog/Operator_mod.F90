@@ -62,7 +62,8 @@ Module Operator_mod
      complex (Kind=Kind(0.d0)) :: g                         !> coupling constant
      complex (Kind=Kind(0.d0)), allocatable :: g_t(:)       !> time dependent  coupling constant
      complex (Kind=Kind(0.d0)) :: alpha                     !> operator shift
-     Integer          :: Type                               !> Type of the operator: 1=Ising; 2=discrete HS; 3=continues HS
+     Integer          :: Type                               !> Type of the operator: 1=Ising; 2=discrete HS; 3=continuous scalar HS, 4=  Complex for  three  bondy term.
+     Integer          :: Flip_protocol=1                    !> Flip protocol  for  local  updates.  Only  relevant  for  type =3  fields. 
      ! P is an N X Ndim matrix such that  P.T*O*P*  =  A  
      ! P has only one non-zero entry per column which is specified by P
      ! All in all.   g * Phi(s,type) * ( c^{dagger} A c  + alpha )
@@ -201,6 +202,7 @@ Contains
     Op%alpha = cmplx(0.d0,0.d0, kind(0.D0))
     Op%diag  = .false.
     Op%type = 0
+    OP%flip_protocol = 1
     Op%U_alloc = .false.
     Op%M_exp_alloc = .false.
     Op%g_t_alloc = .false.

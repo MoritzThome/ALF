@@ -476,7 +476,8 @@ Program Main
         
         call nsigma%make(N_op, Ltrot)
         Do n = 1,N_op
-           nsigma%t(n)  = OP_V(n,1)%type
+           nsigma%t(n)              = OP_V(n,1)%type
+           nsigma%flip_protocol(n)  = OP_V(n,1)%flip_protocol
         Enddo
            
         File_seeds="seeds"
@@ -662,7 +663,7 @@ Program Main
               do n1  =  1,4 
                  Toggle1 = .false.
                  do n =1,N_op
-                    if (nsigma%Flip_protocol(n)  ==  n1  )  Toggle1 = .true.
+                    if (nsigma%Flip_protocol(n)  ==  n1  .and. nsigma%t(n) == 4  )  Toggle1 = .true.
                  enddo
                  if  (Toggle1)   Write(50,"(I2,2x)",advance="no")   n1 
               enddo

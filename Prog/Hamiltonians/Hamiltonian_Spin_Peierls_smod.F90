@@ -454,6 +454,7 @@
                       Op_V(nc,nf)%g     = SQRT(CMPLX(DTAU*J_heis/4.d0, 0.D0, kind(0.D0))) 
                       Op_V(nc,nf)%alpha = cmplx(0.d0, 0.d0, kind(0.D0))
                       Op_V(nc,nf)%type  = 4
+                      Op_V(nc,nf)%flip_protocol = 2
                       Call Op_set( Op_V(nc,nf) )
                       Listb   (I,no)  =  nc
                       Invlistb(nc,1)  =  I
@@ -483,6 +484,7 @@
                       Op_V(nc,nf)%g     = SQRT(CMPLX(DTAU*J_heis/4.d0, 0.D0, kind(0.D0))) 
                       Op_V(nc,nf)%alpha = cmplx(0.d0, 0.d0, kind(0.D0))
                       Op_V(nc,nf)%type  = 4
+                      Op_V(nc,nf)%flip_protocol = 2
                       Call Op_set( Op_V(nc,nf) )
                       Listb   (I,no)  =  nc
                       Invlistb(nc,1)  =  I
