@@ -249,7 +249,7 @@
         Implicit none
         Class (Fields) :: this
 
-        deallocate (this%f, this%t )
+        deallocate (this%f, this%t,  this%Flip_protocol )
       end Subroutine Fields_clear
 
 !-------------------------------------------------------------------
