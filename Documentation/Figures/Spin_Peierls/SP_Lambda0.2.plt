@@ -39,7 +39,7 @@ set xlabel " $q $ "
 #set x2label " $ \\frac{1}{2 \\theta t + \\beta t} $ "
 plot "Lx16_Ly1_Jx1.0_Jy0.000001_Om0.25_Lam0.2_Beta8/SpinZ_eqJK" u 1:2:3 w e lc rgb col8 lt 1 pt 5 t "ALF", \
      "Lx16_Ly1_Jx1.0_Jy0.000001_Om0.25_Lam0.2_Beta8/SpinZ_eqJK" u ($1+2*pi):2:3 w e lc rgb col8 lt 1 pt 5 t "", \
-     "Lx16_Ly1_Jx1.0_Jy0.000001_Om0.25_Lam0.2_Beta8/spinztotJ_lambda0.2" u ($1):($2*4):($3*4) w e lc rgb col6 lt 1 pt 9 t "Wormhole"
+     "Lx16_Ly1_Jx1.0_Jy0.000001_Om0.25_Lam0.2_Beta8/spinztotJ_lambda0.2" u ($1):($2*4):($3*4) w e lc rgb col6 lt 1 pt 9 t "SSE"
 unset multiplot
 
 set output 
