@@ -43,6 +43,7 @@
     Module Predefined_Obs
 
       use runtime_error_mod
+      use Operator_mod
       Use Observables
       Use Lattices_v3
       Use entanglement_mod
@@ -550,6 +551,72 @@
       end Subroutine Predefined_Obs_tau_Den_measure
       
 #include  "Cotunneling_dimer_obs.F90"
+!-------------------------------------------------------------------
+!> @Author
+!> ALF-project
+!
+!>  @brief
+!>  Let  OP_V  be  a  type  two  operator.  Then  this  function  returns:
+!>  
+!>  Routine returns:
+!>        << ( \sum_{s=1}^{N_FL} \sum_{sigma=1}^{N_SUN} [\sum_{x,y}( c^dag_{x,s,sig} V^{s}_{x,y} c^dag_{y,s,sig} ) + \alpha_s] )^2 >>
+!>
+!--------------------------------------------------------------------
+      Complex  (Kind=Kind(0.d0))  function  Predefined_Obs_V_Int(OP_Vint, GR, GRC, N_SUN )
+
+        Implicit none
+        type (Operator)          , Intent(In) :: OP_Vint(:) 
+        Integer                  , Intent(In) :: N_SUN
+        Complex (Kind=Kind(0.d0)), Intent(In) :: GR(:,:,:), GRC(:,:,:)
+
+        ! Local
+        Complex  (Kind=Kind(0.d0))  ::  Z,  Z_tmp,  ZC  
+        Integer  ::  N_FL, N,  I, J,  I1,  J1, nf
+        Real     (Kind=Kind(0.d0))  ::   Zero=1.0D-16
+
+        If ( OP_Vint(1)%type  .ne. 2 )   then
+           Write(error_unit,*) 'Predefined_Obs_V_Int  routine is   defined  fro  tpye  2  vertices.  '
+           CALL Terminate_on_error(ERROR_GENERIC,__FILE__,__LINE__)
+        endif
+        
+        N_FL  =   Size(GR,3)
+        N     =   Size(OP_Vint(1)%O,1)
+
+        Z    =  cmplx(0.d0,0.d0,kind(0.d0))
+        do  nf  =  1,N_FL 
+           Z_tmp     =   cmplx(0.d0,0.d0,kind(0.d0))
+           do  J =  1,N 
+              do  I  =  1,N
+                 Z_tmp  =  Z_tmp  +   OP_Vint(nf)%O(i,j)  * GRC(OP_Vint(nf)%P(I), OP_Vint(nf)%P(J), nf)
+              enddo
+           enddo
+           Z =   Z   +  Z_tmp   +   OP_Vint(nf)%alpha
+        enddo
+        Z  =  Z*dble(N_SUN)
+
+        ZC  =  cmplx(0.d0,0.d0,kind(0.d0))
+        Do nf = 1, N_FL
+           Do  J =  1,N
+              Do I =  1,N
+                 Z_tmp  =   OP_Vint(nf)%O(I,J)
+                 If  (  real(Z_tmp*conjg(Z_tmp),  kind(0.d0)) >  Zero )  then
+                    Do J1 = 1,N
+                       Do I1  = 1,N
+                          ZC  =  ZC  +  Z_tmp*OP_Vint(nf)%O(I1,J1)* &
+                               &        GRC(OP_Vint(nf)%P(I),OP_Vint(nf)%P(J1),nf)*&
+                               &         GR(OP_Vint(nf)%P(J),OP_Vint(nf)%P(I1),nf)
+                       Enddo
+                    Enddo
+                 Endif
+              Enddo
+           Enddo
+        Enddo
+        ZC =  ZC * dble(N_SUN)
+        Predefined_Obs_V_Int =   Z*Z   + ZC 
+        
+      end function Predefined_Obs_V_Int
+
+      
       
       Subroutine Predefined_Obs_scal_Renyi_Ent_indep(GRC, List, Nsites, N_SUN, ZS, ZP, Obs )
 
