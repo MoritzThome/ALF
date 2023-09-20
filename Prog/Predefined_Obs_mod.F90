@@ -348,7 +348,7 @@
 
 
         If ( Size(List,1) .ne. Size(GT0,1) .or. Size(List,2) .ne. 2 )   then
-           Write(error_unit,*) 'List in has Predefined_Obs_tau_Green_measure  wrong  dim.'
+           Write(error_unit,*) 'List in  Predefined_Obs_tau_Green_measure  has  wrong  dim.'
            CALL Terminate_on_error(ERROR_GENERIC,__FILE__,__LINE__)
         endif
 

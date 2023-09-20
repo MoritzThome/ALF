@@ -359,24 +359,23 @@
 
           end Select
           
-          Allocate (List_f(Latt%N*Latt_Unit_f%Norb,2), Invlist_f(Latt%N,Latt_Unit_f%Norb))
-          nc = 0
+          Allocate (List_f(Ndim,2), Invlist_f(Latt%N,Latt_Unit_f%Norb))
+          List_f = 0
           Do I = 1,Latt%N
              Do no = 1,Latt_Unit_f%Norb
-                nc = nc + 1
-                List_f(nc,1) = I
-                List_f(nc,2) = no 
+                list_f(Invlist(I,no + Latt_Unit%Norb/2),1)  =  I
+                list_f(Invlist(I,no + Latt_Unit%Norb/2),2)  =  no
                 Invlist_f(I,no) =  Invlist(I,no + Latt_Unit%Norb/2)
              Enddo
           Enddo
           
-          Allocate (List_c(Latt%N*Latt_Unit_c%Norb,2), Invlist_c(Latt%N,Latt_Unit_c%Norb))
+          Allocate (List_c(Ndim,2), Invlist_c(Latt%N,Latt_Unit_c%Norb))
+          List_c = 0 
           nc = 0
           Do I = 1,Latt%N
              Do no = 1,Latt_Unit_c%Norb
-                nc = nc + 1
-                List_c(nc,1) = I
-                List_c(nc,2) = no
+                List_c(Invlist(I,no ),1) = I
+                List_c(Invlist(I,no ),2) = no
                 Invlist_c(I,no) = Invlist(I,no )
              Enddo
           Enddo
