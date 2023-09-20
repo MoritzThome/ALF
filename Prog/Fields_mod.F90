@@ -49,8 +49,9 @@
 !>       \phi_{n,\tau}(\pm 2) = \pm \sqrt{2  ( 3 + \sqrt{6} ) }  \f]
 !> For  type=3 the fields, f, are real and  \f$ \gamma_{n,\tau}(f)  = 1, \phi_{n,\tau}(f) = f \f$
 !>
-!> For  type=4   is  for  multiple HS  fields  per  vertex  f = \pm 1, pm 2,  and  h  is  real    with    
-!>                        gamma = gamma(f)   and   phi = \sqrt{1 + h} eta(f)  
+!> For  type=4   is  for  two  HS  fields  per  vertex,  encoded in the  real  and imaginary parts of f.
+!>                Re(f) = \pm 1, pm 2,  and   Im(f) is  real    with    
+!>                 gamma = gamma(Re(f))   and   phi = \sqrt{1 + aimag(f) } eta(real(f))  
 !--------------------------------------------------------------------
 
 
