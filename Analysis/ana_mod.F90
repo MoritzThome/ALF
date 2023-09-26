@@ -1264,7 +1264,7 @@ Subroutine read_latt_hdf5(filename, name, sgn, bins, bins0, Latt, Latt_unit, dta
       REAL    (Kind=Kind(0.d0)), Allocatable  :: AutoCorr(:)
       Integer :: Nobs, Nobs_output, data_range
       Integer :: Nbins, Nbins_eff, I, IOBS, N_Back, N_BZ_Zones =  1 
-      Logical ::  Extended_Zone = .false. 
+      Logical :: Extended_Zone = .false. 
       
 
       
