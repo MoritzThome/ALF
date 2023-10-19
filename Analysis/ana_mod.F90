@@ -1116,7 +1116,7 @@ Subroutine read_latt_hdf5(filename, name, sgn, bins, bins0, Latt, Latt_unit, dta
                      do i  =  1,size(Latt%BZ1_p,1)
                         X  =  X + Xk_Extended_p(i)*Latt_unit%Orb_pos_p(no,i) 
                      enddo
-                     Weights(no)  =  exp(cmplx(0.d0, X , kind(0.d0) ) )
+                     Weights(no)  =  exp( cmplx(0.d0, X , kind(0.d0) ) )
                   enddo
                   do nb =  1,Nbins
                      do no1 =  1, Latt_unit%Norb
