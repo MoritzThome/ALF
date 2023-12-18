@@ -236,10 +236,10 @@ build:
         IMAGE_MINOR: bullseye-pgi-21-03
         MODE: [noMPI, MPI, TEMPERING, PARALLEL_PARAMS]
       - MACHINE: INTEL
-        IMAGE_MINOR: [bullseye-intel, intel]
+        IMAGE_MINOR: [bullseye-intel, bookworm-intel]
         MODE: [noMPI, MPI, TEMPERING, PARALLEL_PARAMS]
       - MACHINE: INTELLLVM
-        IMAGE_MINOR: intel
+        IMAGE_MINOR: bookworm-intel
         MODE: [noMPI, MPI, TEMPERING, PARALLEL_PARAMS]
 
 build_mac:
@@ -265,10 +265,10 @@ test:
         IMAGE_MINOR: bullseye-pgi-21-03
         MODE: [noMPI, MPI, TEMPERING, PARALLEL_PARAMS]
       - MACHINE: INTEL
-        IMAGE_MINOR: [bullseye-intel, intel]
+        IMAGE_MINOR: [bullseye-intel, bookworm-intel]
         MODE: [noMPI, MPI, TEMPERING, PARALLEL_PARAMS]
       - MACHINE: INTELLLVM
-        IMAGE_MINOR: intel
+        IMAGE_MINOR: bookworm-intel
         MODE: [noMPI]
 
 test_mac:
