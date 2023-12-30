@@ -40,10 +40,10 @@
 !>
 !
 !--------------------------------------------------------------------
-     Use MaxEnt_stoch_mod
-     Use MaxEnt_mod
-
+       Use MaxEnt_stoch_mod
+       Use MaxEnt_mod
        use iso_fortran_env, only: output_unit, error_unit
+
        Implicit  None
        Interface
          Subroutine  Rescale ( XCOV, XQMC,XTAU, Ntau_st, Ntau_en, Tolerance,  Ntau)
@@ -60,6 +60,13 @@
              Real (Kind=Kind(0.d0)), INTENT(IN), allocatable ::  Xtau(:)
              Real (Kind=Kind(0.d0)), INTENT(IN) :: Om_ST, Om_en, beta
           End Subroutine Set_Ker_classic
+          Subroutine Set_default(Default,beta,Channel, OM_st, Om_en, xmom1,Default_model_exists)
+             Implicit none
+             Real (Kind=Kind(0.d0)), INTENT(INOUT), allocatable ::  Default(:)
+             Real (Kind=Kind(0.d0)), INTENT(IN) ::  beta, xmom1,  Om_st,  Om_en
+             Character (Len=2), INTENT(IN)      :: Channel
+             Logical,  INTENT(IN)               :: Default_model_exists 
+          End Subroutine Set_default
        end Interface
 
        Real (Kind=Kind(0.d0)), Dimension(:)  , allocatable :: XQMC, XQMC_st, XTAU, Xtau_st, &
@@ -77,6 +84,7 @@
        Real (Kind=Kind(0.d0)) :: OM_st, OM_en,  alpha_st, R, Tolerance
        Logical                :: Checkpoint,  Stochastic, Default_model_exists, Particle_channel_PH
        Character (Len=2)      :: Channel
+       Character (Len=1)      :: Char, Char1
        ! Space  for classic MaxEnt
        Real (Kind=Kind(0.d0)), allocatable ::  Xker_classic(:,:),  A_classic(:),  Default(:)
 
@@ -101,6 +109,7 @@
        endif
        close(30)
        
+       INQUIRE(FILE="Default", EXIST=Default_model_exists)
 
        open (unit=10,File="g_dat", status="unknown")
        read(10,*)  ntau, nbin_qmc, Beta, Norb, Channel
@@ -123,7 +132,7 @@
 
        Open(unit=50,File='Info_MaxEnt',Status="unknown")
        write(50,*) 'Channel      :: ', Channel
-       If (Channel == "ph" )  then
+       If (Channel == "PH" )  then
           Write(50,*)  'Om_start is set to zero. PH channel corresponds to symmetric data '
           Om_st = 0.d0
        endif
@@ -140,7 +149,6 @@
          Write(50, "('N_Alpha, Alpha_st,R:: ',2x,I4,F12.6,2x,F12.6)") N_alpha, alpha_st, R
        else
          Write(50, *)  "Classic  MaxEnt" 
-         INQUIRE(FILE="Default", EXIST=Default_model_exists)
          If (Default_model_exists .and.  .not.Stochastic )  then
             Write(50, *)  "Using  classic  MaxEnt  with provided default model"
          endif
@@ -204,13 +212,21 @@
           Allocate (A_classic(Ndis), Default(Ndis), XKer_classic(size(Xqmc,1),Ndis))
           If (Default_model_exists) then
              Open(Unit=10,file="Default",status="unknown") 
+             read (10,*) Char 
+             rewind(10) 
+             If (Char == "X" )   then
                 do nw = 1,Ndis
-                   read(10,*) X,Default(nw)
+                  read(10,*) Char1,X, X1, Default(nw)
                 enddo
+             else 
+                do nw = 1,Ndis
+                  read(10,*) X,Default(nw)
+                enddo
+             endif
              close(10)
-             DOM  =  (OM_En -  OM_St)/dble(Ndis)
-             Default = Default*dom
           endif
+          Call Set_default(Default,beta,Channel, OM_st, Om_en, xmom1,Default_model_exists)
+          Write(6,*) 'Hi'
        endif
 
       
@@ -234,7 +250,6 @@
              ! Beware: Xqmc and cov are modified in the MaxEnt_stoch call.
           else
              Call Set_Ker_classic(Xker_ph,Xker_classic,Om_st,Om_en,beta,xtau_st)
-             If (.not.Default_model_exists) Default = Xmom1/dble(Ndis)
              Call  MaxEnt( XQMC, XCOV, A_classic, XKER_classic, Alpha_classic_st, CHISQ ,DEFAULT)
           endif 
        Case ("PP")
@@ -249,7 +264,6 @@
              ! Beware: Xqmc and cov are modified in the MaxEnt_stoch call.
           else
              Call Set_Ker_classic(Xker_pp,Xker_classic,Om_st,Om_en,beta,xtau_st)
-             If (.not.Default_model_exists) Default = Xmom1/dble(Ndis)
              Call  MaxEnt( XQMC, XCOV, A_classic, XKER_classic, Alpha_classic_st, CHISQ ,DEFAULT)
           endif
        Case ("P")
@@ -278,7 +292,6 @@
              else 
                Call Set_Ker_classic(Xker_p_ph,Xker_classic,Om_st,Om_en,beta,xtau_st)
              endif   
-             If (.not.Default_model_exists) Default = Xmom1/dble(Ndis)
              Call  MaxEnt( XQMC, XCOV, A_classic, XKER_classic, Alpha_classic_st, CHISQ ,DEFAULT)
           endif  
        Case ("T0")
@@ -293,7 +306,6 @@
             ! Beware: Xqmc and cov are modified in the MaxEnt_stoch call.
           else
              Call Set_Ker_classic(Xker_T0,Xker_classic,Om_st,Om_en,beta,xtau_st)
-             If (.not.Default_model_exists) Default = Xmom1/dble(Ndis)
              Call  MaxEnt( XQMC, XCOV, A_classic, XKER_classic, Alpha_classic_st, CHISQ ,DEFAULT)
           endif
        Case default
@@ -481,7 +493,6 @@
        real (Kind=Kind(0.d0)) :: Zero
 
        Zero = 1.D-8
-
        if ( abs(om) < zero ) then
           Back_trans_pp = beta * Aom/2.d0
        else
@@ -594,3 +605,70 @@
           Enddo
        enddo
     end Subroutine Set_Ker_classic
+
+
+   Subroutine Set_default(Default,beta,Channel, OM_st, Om_en, xmom1,Default_model_exists)
+       use iso_fortran_env, only: output_unit, error_unit
+       
+       Implicit none
+
+       Real (Kind=Kind(0.d0)), INTENT(INOUT), allocatable ::  Default(:)
+       Real (Kind=Kind(0.d0)), INTENT(IN) ::  beta, xmom1,  Om_st,  Om_en
+       Character (Len=2), INTENT(IN)      :: Channel
+       Logical,  INTENT(IN)               :: Default_model_exists 
+
+       Integer :: Ndis, Nw
+       Real (Kind = Kind(0.d0)) ::   Dom, X, Om,  Zero = 1.D-8
+
+       Ndis = size(Default,1)
+       Dom = (OM_en - Om_st)/dble(Ndis)
+       Select Case (Channel)
+       case("P")
+         If (.not. Default_model_exists ) Default = Xmom1/(Om_en - Om_st)
+         Default = Default*Dom
+       case("PH")
+         If (.not. Default_model_exists ) Default = 1.d0/(Om_en - Om_st) ! Flat  default   
+         !Compute   sum rule  for  A(om)
+         X  = 0.d0
+         Do  nw = 1, Ndis
+             Om = Om_st + dble(nw)*dom
+             Default(nw)  = (1.d0 + exp(-beta*om)) * Default(nw)
+             X = X + Default(nw) 
+         enddo
+         X = X*dom
+         Default =  Default*Xmom1/X
+         Default =  Default*dom
+       case("T0")
+         If (.not. Default_model_exists ) Default = Xmom1/(Om_en - Om_st)
+         Default = Default*Dom
+       case("PP")
+         If (.not. Default_model_exists ) Default = 1.d0/(Om_en - Om_st) ! Flat  default   
+         !Compute   sum rule  for  A(om)
+         X  = 0.d0
+         Do  nw = 1, Ndis
+             Om = Om_st + dble(nw)*dom
+             if ( abs(om) < zero ) then
+                Default(nw) = Default(nw)*2.d0/ beta 
+             else
+                Default(nw) = Default(nw) * (om *( 1.d0 + exp(-beta*om) ) )/ (1.d0 - exp(-beta*om) ) 
+            endif
+             Default(nw)  = (1.d0 + exp(-beta*om)) * Default(nw)
+             X = X + Default(nw) 
+         enddo
+         X = X*dom
+         Default =  Default*Xmom1/X
+         Default =  Default*dom
+       case  default
+         Write(error_unit,*) "Channel not yet implemented for default model"
+         error stop 1
+       end Select
+       Open (Unit=10,File="Default_used", status="Unknown")
+       X = 0.d0
+       Do  nw = 1, Ndis
+          Om = Om_st + dble(nw)*Dom
+          X = X + Default(nw)
+          Write(10,"(F14.7,2x,F14.7)") Om, Default(nw)/dom
+       enddo
+       Write(10,'("# Testing  sum rule for  default : ", F14.7,2x,F14.7)' )  X, Xmom1
+       close(10)
+   end subroutine Set_default
