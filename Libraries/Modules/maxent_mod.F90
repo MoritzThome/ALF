@@ -1,5 +1,51 @@
 
+!  Copyright (C) 2018-2024 The ALF project
+!
+!     The ALF project is free software: you can redistribute it and/or modify
+!     it under the terms of the GNU General Public License as published by
+!     the Free Software Foundation, either version 3 of the License, or
+!     (at your option) any later version.
+!
+!     The ALF project is distributed in the hope that it will be useful,
+!     but WITHOUT ANY WARRANTY; without even the implied warranty of
+!     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!     GNU General Public License for more details.
+!
+!     You should have received a copy of the GNU General Public License
+!     along with Foobar.  If not, see http://www.gnu.org/licenses/.
+!
+!     Under Section 7 of GPL version 3 we require you to fulfill the following additional terms:
+!
+!     - It is our hope that this program makes a contribution to the scientific community. Being
+!       part of that community we feel that it is reasonable to require you to give an attribution
+!       back to the original authors if you have benefitted from this program.
+!       Guidelines for a proper citation can be found on the project's homepage
+!       http://alf.physik.uni-wuerzburg.de .
+!
+!     - We require the preservation of the above copyright notice and this license in all original files.
+!
+!     - We prohibit the misrepresentation of the origin of the original source files. To obtain
+!       the original source files please visit the homepage http://alf.physik.uni-wuerzburg.de .
+!
+!     - If you make substantial changes to the program we require you to either consider contributing
+!       to the ALF project or to mark your material in a reasonable way as different from the original version.
+
+
 Module MaxEnt_mod
+!--------------------------------------------------------------------
+!> @author
+!> ALF-project
+!
+!> @brief
+!> This module provides  an implementation of  the  classic maximum entropy  algorithm 
+!> for  analytical  continuation. It  follows  closely the  work of 
+!>   1.   W. von der Linden, Maximum-entropy data analysis, Applied Physics A 60 (1995), no. 2, 155–165. 
+!>   and 
+!>   2.  Mark Jarrell and J.E. Gubernatis, Bayesian inference and the analytic continuation 
+!>   of imaginary-time quantum monte carlo data, Physics Reports 269 (1996), no. 3, 133–195.
+
+!
+!--------------------------------------------------------------------
 
         Use MyMats
         Use Errors
