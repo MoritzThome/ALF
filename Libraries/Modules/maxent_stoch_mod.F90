@@ -446,232 +446,25 @@ Module MaxEnt_stoch_mod
                enddo
             endif
          end Subroutine Set_default_table
-!-------------------
-         Subroutine MaxEnt_stoch_fit(XQMC, Xtau, COV, Lcov, XKER, Xmom1, Beta_1, Alpha_tot,&
-                 & Ngamma_1, OM_ST, OM_EN, Nsweeps, NBins, NWarm, Aom_res,&
-                 & xom_res, Chisq )
-              
-           Implicit None
-           
-           Real (Kind=Kind(0.d0)), Dimension(:) :: XQMC, Xtau, Alpha_tot, Aom_res, Xom_res
-           Real (Kind=Kind(0.d0)), Dimension(:,:) :: COV
-           Real (Kind=Kind(0.d0)), external :: XKER
-           Real (Kind=Kind(0.d0)) :: CHISQ, OM_ST, OM_EN, Beta_1, Xmom1, Err
-           Integer :: Nsweeps, NBins, Ngamma_1, nw, nt1, Lcov
-           ! Local
-           Integer NSims, ns, nb, nc, Nwarm, nalp1, nalp2, Nex
-           Real (Kind=Kind(0.d0)), Allocatable :: Xn_M_tot(:,:), En_M_tot(:), Xn_E_tot(:,:), En_E_tot(:), &
-                & Xn_tot(:,:,:), En_tot(:), Xker_table(:,:)
-           Real (Kind=Kind(0.d0)), Allocatable :: G_Mean(:), Xn_m(:), Xn_e(:), Xn(:,:), Vhelp(:)
-           Real (Kind=Kind(0.d0)) :: En_M, Alpha, Acc_1, Acc_2, En, DeltaE, Ratio, D
-           Real (Kind=Kind(0.d0)) :: Aom, om, tau
-           Real (Kind=Kind(0.d0)), allocatable :: U(:,:), sigma(:)
-           Pi = acos(-1.d0)
-           Call Get_seed_Len(L_seed)
-           Allocate(Iseed_vec(L_seed))
-           Iseed_vec = 0
-           Call Ranset(Iseed_vec)
-           NDis = Size(Aom_res,1)
-           DeltaXMAX = 0.01
-           delta = 0.001
-           delta2 = delta*delta
-           Ngamma = Ngamma_1
-           Beta = Beta_1 ! Physical temperature for calculation of the kernel.
-           Ntau = Size(xqmc,1)
-           NSims = Size(Alpha_tot,1)
-           Allocate (Xn_tot(Ngamma,2,NSims))
-           Allocate (En_m_tot(NSims), En_e_tot(NSims), En_tot(NSims) )
-           Allocate (Xn_m_tot(NDis,NSims), Xn_e_tot(NDis,NSims) )
-           Allocate (Xn(Ngamma,2))
-           Allocate (Xn_m(NDis), Xn_e(NDis) )
-           Om_st_1 = OM_st; Om_en_1 = OM_en
-           ! Setup table for the Kernel
-           Ndis = Size(Aom_res)
-           Dom_table = (OM_EN_1 - OM_ST_1)/dble(Ndis-1)
-           Allocate ( Xker_table(Ntau, Ndis) )
-           Dom_table = (OM_EN - OM_ST)/dble(Ndis-1)
-           do nt = 1,Ntau
-              do nw = 1,Ndis
-                 tau = xtau(nt)
-                 Om = OM_st + dble(nw-1)*Dom_table
-                 Xker_table(nt,nw) = Xker(tau,om,beta)
-              enddo
-           enddo
-           ! Normalize data to have zeroth moment of unity.
-           xqmc = xqmc / XMOM1
-           cov = cov / ((XMOM1)**2)
-           ! Diagonalize the covariance
-           If (Lcov.eq.1) then
-              Allocate( U(ntau,ntau), Sigma(ntau), xqmc1(Ntau) )
-              Call Diag(cov,U,sigma)
-              do nt = 1,ntau
-                 sigma(nt) = sqrt(sigma(nt))
-              enddo
-              xqmc1 = 0.d0
-              do nt1 = 1,ntau
-                 do nt = 1,ntau
-                    xqmc1(nt1) = xqmc1(nt1) + xqmc(nt)*U(nt,nt1)
-                 enddo
-                 xqmc1(nt1) = xqmc1(nt1)/sigma(nt1)
-              enddo
-              ! Transform the Kernel
-              allocate ( Vhelp(Ntau) )
-              do nw = 1,Ndis
-                 Vhelp = 0.d0
-                 do nt1 = 1,Ntau
-                    do nt = 1,Ntau
-                       Vhelp(nt1) = Vhelp(nt1) + Xker_table(nt,nw)*U(nt,nt1)
-                    enddo
-                 enddo
-                 do nt1 = 1,ntau
-                    Xker_table(nt1,nw) = Vhelp(nt1)/sigma(nt1) !! This has changed !!
-                 enddo
-              enddo
-              Deallocate (U,sigma)
-           else
-              Allocate( Sigma(ntau), xqmc1(Ntau) )
-              !Call Diag(cov,U,sigma)
-              do nt = 1,ntau
-                 sigma(nt) = 1.d0/sqrt(cov(nt,nt))
-              enddo
-              xqmc1 = 0.d0
-              do nt1 = 1,ntau
-                 xqmc1(nt1) = xqmc(nt1)*sigma(nt1)
-              enddo
-              ! Transform the Kernel
-              allocate ( Vhelp(Ntau) )
-              do nw = 1,Ndis
-                 do nt1 = 1,ntau
-                    Xker_table(nt1,nw) = Xker_table(nt1,nw)*sigma(nt1) !! This has changed !!
-                 enddo
-              enddo
-              deallocate(Sigma)
-           endif
-           Allocate(G_Mean(Ntau))
-           G_mean = 0.d0
-           ! write(6,*) ' There are ', Ngamma,' delta-functions for a spectrum'
-           ! Write(6,*) ' Initializing'
-           Do Ns = 1,NSims
-              do ng = 1,NGamma
-                 Xn_tot(ng,1,ns) = ranf_wrap()
-                 Xn_tot(ng,2,ns) = 1.d0/dble(Ngamma)
-              enddo
-           enddo
-           Xn_m_tot = 0.d0
-           En_m_tot = 0.d0
-           Xn_e_tot = 0.d0
-           En_e_tot = 0.d0
-           ! D(om) = 1/(Om_en_1 - Om_st_1)
-           D = 1.d0 / (Om_en_1 - Om_st_1)
-           Open (Unit=44,File='Max_stoch_log', Status="unknown", position="append")
-           Write(44,*) "N E W  R U N "
-           nc = 0
-           do Nb = 1,Nbins
-              do ns = 1,NSims
-                 do ng = 1,Ngamma
-                    Xn(ng,1) = Xn_tot(ng,1,ns)
-                    Xn(ng,2) = Xn_tot(ng,2,ns)
-                 enddo
-                 Alpha = Alpha_tot(ns)
-                 Call MC(Xtau, Xker_table, Xn, Alpha, NSweeps, Xn_m, En, En_m, &
-                      & Acc_1, Acc_2 ) ! Just one bin
-                 do ng = 1,Ngamma
-                    Xn_tot(ng,1,ns) = Xn(ng,1)
-                    Xn_tot(ng,2,ns) = Xn(ng,2)
-                 enddo
-                 En_tot(ns) = En ! this is the energy of the configuration Xn_tot for simulation ns
-                 Write(44,2003) 1.d0/Alpha, En_m, Acc_1, Acc_2
-                 if (nb.gt.nwarm) then
-                    if (ns.eq.1) nc = nc + 1
-                    do nd = 1,NDis
-                       Xn_m(nd) = Xn_m(nd) * D * dble(Ndis)
-                       Xn_m_tot(nd,ns) = Xn_m_tot(nd,ns) + Xn_m(nd)
-                       Xn_e_tot(nd,ns) = Xn_e_tot(nd,ns) + Xn_m(nd)*Xn_m(nd)
-                    enddo
-                    En_m_tot(ns) = En_m_tot(ns) + En_m
-                    En_e_tot(ns) = En_e_tot(ns) + En_m*En_m
-                 endif
-              enddo
-              ! Exchange
-              Acc_1 = 0.d0
-              Do Nex = 1, 2*NSims
-                 nalp1= nint( ranf_wrap()*dble(NSims-1) + 0.5 ) ! 1..(NSims-1)
-                 nalp2 = nalp1 + 1
-                 DeltaE = (Alpha_tot(nalp1)*En_tot(nalp2) + Alpha_tot(nalp2)*En_tot(nalp1))&
-                      & -(Alpha_tot(nalp1)*En_tot(nalp1) + Alpha_tot(nalp2)*En_tot(nalp2))
-                 Ratio = exp(-DeltaE)
-                 if (Ratio.gt.ranf_wrap()) Then
-                    Acc_1 = Acc_1 + 1.0
-                    !Switch confs an Energies.
-                    do ng = 1,Ngamma
-                       Xn(ng,1) = Xn_tot(ng,1,nalp1)
-                       Xn(ng,2) = Xn_tot(ng,2,nalp1)
-                    enddo
-                    do ng = 1,Ngamma
-                       Xn_tot(ng,1,nalp1) = Xn_tot(ng,1,nalp2)
-                       Xn_tot(ng,2,nalp1) = Xn_tot(ng,2,nalp2)
-                       Xn_tot(ng,1,nalp2) = Xn(ng,1)
-                       Xn_tot(ng,2,nalp2) = Xn(ng,2)
-                    enddo
-                    En_m = En_tot(nalp1)
-                    En_tot(nalp1) = En_tot(nalp2)
-                    En_tot(nalp2) = En_m
-                 endif
-              enddo
-              Acc_1 = Acc_1/dble(Nex)
-              Write(44,*) 'Acc Exchange: ', Acc_1
-           enddo
-           !Open(Unit=66,File="energies",status="unknown")
-           do ns = Nsims,Nsims
-              En_m_tot(ns) = En_m_tot(ns) / dble(nc)
-              En_e_tot(ns) = En_e_tot(ns) / dble(nc)
-              En_e_tot(ns) = ( En_e_tot(ns) - En_m_tot(ns)**2)/dble(nc)
-              if ( En_e_tot(ns) .gt. 0.d0) then
-                 En_e_tot(ns) = sqrt(En_e_tot(ns))
-              else
-                 En_e_tot(ns) = 0.d0
-              endif
-              !write(66,*) Alpha_tot(ns), En_m_tot(ns), En_e_tot(ns)
-           enddo
-           !close(60)
-           Chisq = En_e_tot(Nsims)
-           Close(44)
-           do ns = Nsims,Nsims
-              do nd = 1,Ndis
-                 Xn_m_tot(nd,ns) = Xn_m_tot(nd,ns) / dble(nc) ! * delta /(dble(nc)*pi)
-                 Xn_e_tot(nd,ns) = Xn_e_tot(nd,ns) / dble(nc) ! * delta /(dble(nc)*pi)
-                 Xn_e_tot(nd,ns) = (Xn_e_tot(nd,ns) - Xn_m_tot(nd,ns)* Xn_m_tot(nd,ns))/dble(nc)
-                 if (Xn_e_tot(nd,ns).gt.0.d0) then
-                    Xn_e_tot(nd,ns) = sqrt(Xn_e_tot(nd,ns))
-                 else
-                    Xn_e_tot(nd,ns) = 0.d0
-                 endif
-                 om = PhiM1(dble(nd)/dble(NDis))
-                 Aom = Xn_m_tot(nd,ns) * Xmom1
-                 Err = Xn_e_tot(nd,ns) * Xmom1
-                 !write(66,2001) om, Aom, Err
-                 if (ns.eq.Nsims) then
-                    Aom_res(nd) = Aom
-                    xom_res(nd) = om
-                 endif
-              enddo
-              !Close(66)
-           enddo
-           ! Reset the input data
-           xqmc = XMOM1* xqmc
-           cov = ((XMOM1)**2)* cov
-           DeAllocate (Xn_tot)
-           DeAllocate (En_m_tot, En_e_tot, En_tot )
-           DeAllocate (Xn_m_tot, Xn_e_tot )
-           DeAllocate (Xn)
-           DeAllocate (Xn_m, Xn_e)
-           DeAllocate( G_Mean )
-           DeAllocate( xqmc1 )
-           Deallocate( Xker_table )
-           DeAllocate(Iseed_vec)
 
-2003     format('Alpha, En_m, Acc ', F14.7,2x,F14.7,2x,F14.7,2x,F14.7,2x,F14.7)
-         end Subroutine MaxEnt_stoch_fit
+!-------------------
+!         Subroutine MaxEnt_stoch_fit(XQMC, Xtau, COV, Lcov, XKER, Xmom1, Beta_1, Alpha_tot,&
+!                 & Ngamma_1, OM_ST, OM_EN, Nsweeps, NBins, NWarm, Aom_res,&
+!                 & xom_res, Chisq )
+!              
+!           Implicit None
+!           
+!           Real (Kind=Kind(0.d0)), Dimension(:) :: XQMC, Xtau, Alpha_tot, Aom_res, Xom_res
+!           Real (Kind=Kind(0.d0)), Dimension(:,:) :: COV
+!           Real (Kind=Kind(0.d0)), external :: XKER
+!           Real (Kind=Kind(0.d0)) :: CHISQ, OM_ST, OM_EN, Beta_1, Xmom1, Err
+!           Integer :: Nsweeps, NBins, Ngamma_1, nw, nt1, Lcov
+
+!           ! Reset the input data
+!           xqmc = XMOM1* xqmc
+!           cov = ((XMOM1)**2)* cov
+!         end Subroutine MaxEnt_stoch_fit
+!-------------------
  
 !--------------------------------------------------------------------------------------
 !        Uses   the  Phi_func  table  to   generate   
