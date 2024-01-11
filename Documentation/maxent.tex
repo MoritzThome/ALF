@@ -15,7 +15,7 @@ g(\tau) =  \int_{\omega_\mathrm{start}}^{\omega_\mathrm{end}} \d{\omega} K(\tau,
 \end{equation} 
 The  ALF package includes a standard implementation of the stochastic MaxEnt, as formulated in the article of 
 K. Beach~\cite{Beach04a}, in the module \texttt{Libraries/Modules/\allowbreak{}maxent\_stoch\_mod.F90}. 
-It  also  supports  an  implementation of the  Baysian  based  classic  maximum entropy  method  as  
+It  also  supports  an  implementation of the  Bayesian  based  classic  maximum entropy  method  as  
 formulated  in  Refs.~\cite{Jarrell96,Linden95}, in the 
 module \texttt{Libraries/Modules/\allowbreak{}maxent\_mod.F90} 
 Its wrapper is found in \texttt{Analysis/Max\_SAC.F90} and the Green function is read from the
@@ -97,7 +97,7 @@ Besides the parameters included in the namelist \texttt{VAR\_Max\_Stoch} set in 
 required to run the maxent code. Recalling: \texttt{N\_cov = 1} (\texttt{N\_cov = 0}) sets that the covariance will
 (will not) be taken into account.
 
-\paragraph*{The baysian approach}
+\paragraph*{The Bayesian approach}
 It is  beyond  the  scope of  this  documentation to provide a  full  account of the   classic Maximum Entropy method,  and  
 the  interested  reader  is  referred  to Refs.~\cite{Jarrell96,Linden95}   for  detailed  accounts.  \red{FA: How  detailed  
 should this  section be?}
@@ -136,6 +136,7 @@ then  a  flat default model  with  correct  sum rule  is   used.
 
 The code produces the following output files:
 
+\paragraph*{The stochastic  approach}
 \begin{itemize}
 \item The files  \texttt{Aom\_n} contains the average spectral function at inverse temperature  $ \alpha_n $. This corresponds to
 $  \langle A_n(\omega) \rangle =   \frac{1}{Z}   \int \mathcal{D}\!A(\omega) \; e^{-\alpha_n \chi^{2}(A)  } A(\omega). $
@@ -162,10 +163,13 @@ Note that  \texttt{data\_out} contains only the data points that have  passed th
 
 \item Two dump files are also generated, \texttt{dump\_conf} and \texttt{dump\_Aom}. Since the MaxEnt is a Monte Carlo code, it is possible to improve the data by continuing a previous simulation. The data in the dump files allow you to do so. These files are only generated if the variable \texttt{checkpoint} is set to \path{.true.}. 
 
+\item The  file \texttt{Info\_MaxEnt} lists a summary   used parameters  and  best $\chi^2$.  
+
 \end{itemize}
 
 The essential question is: Which image should one use? There is no ultimate answer to this question in the context of the stochastic MaxEnt. The only rule of thumb is to consider temperatures for which the \( \chi^2 \) is  comparable to the number of data points.
 
+\paragraph*{The Bayesian approach}
 
 \subsection{Single-particle quantities: \texttt{Channel=P}}
 For the single-particle Green function, 
@@ -315,7 +319,12 @@ To conclude this section, we show the example of the one-dimensional Hubbard mod
 \center
 \includegraphics[width=\textwidth,clip]{Spectral_1D.pdf}
 
-\caption{Dynamics of the one-dimensional half-filled Hubbard model  on a 46-site chain, with U/t=4 and $\beta t = 10$.  (a) Dynamical charge structure factor, (b) single particle spectral function and (c) dynamical spin structure factor.  Data obtained using the pyALF python script 
- \href{https://git.physik.uni-wuerzburg.de/ALF/ALF/-/blob/\ALFbranch/Documentation/Figures/MaxEnt/Hubbard_1D.py}{\texttt{Hubbard\_1D.py}}, considering 400 bins of 200 sweeps each and taking into account the covariance matrix for the MaxEnt.  The parameters for the MaxEnt  that differ from the default values are also listed in the python script.}
+\caption{Dynamics of the one-dimensional half-filled Hubbard model  on a 46-site chain, with U/t=4 and $\beta t = 10$.  
+The  top  (bottom) panels   correspond  to  stochastic (Classic) Maxent runs.  
+(a,d) Dynamical charge structure factor, (b,e) single particle spectral function and (c,f) dynamical spin structure factor. 
+ Data obtained using the pyALF python script 
+ \href{https://git.physik.uni-wuerzburg.de/ALF/ALF/-/blob/\ALFbranch/Documentation/Figures/MaxEnt/Hubbard_1D.py}
+ {\texttt{Hubbard\_1D.py}}, considering 400 bins of 200 sweeps each and taking into account the covariance matrix for
+  the MaxEnt.  The parameters for the MaxEnt  that differ from the default values are also listed in the python script.}
         \label{Fig:Spectral1D}
 \end{figure}
