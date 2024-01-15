@@ -149,6 +149,14 @@ $ P(\alpha | G,D) $.  Denoting this value of $\alpha$ by $\alpha^{\star}$,
 the final image produced by the classic Maximum Entropy method is $A^{\star}(\alpha^*)$.
 
 \subsubsection*{Input files} 
+
+The parameters for the  Maximum entropy are  listed in the  \texttt{parameters}  file  detailed in 
+Sec.~\ref{sec:input}.  In the namespace   \texttt{VAR\_errors} the  variable  \texttt{N\_Cov} triggers  
+the  use  of the covariance  matrix,  and  in the  namespace \texttt{VAR\_Max\_Stoch}   the   variable 
+\texttt{Stochastic} toggles  between  the  stochastic  and  classic analytical continuation  schemes.  The 
+reader is  referred  to Sec.~\ref{sec:input}  for a  complete  description of the parameters. 
+
+
 In addition to the aforementioned parameter file, the MaxEnt program requires the output of the  analysis of 
 the time-displaced functions. The program \texttt{Anaylsis/ana.out} (see Sec.~\ref{sec:analysis}) generates, 
 for each $k$-point, a directory named   \texttt{Variable\_name\_kx\_ky}.  In this directory  
