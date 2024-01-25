@@ -269,9 +269,10 @@
       Type (Lattice)                        , intent(out) :: Latt
       Type (Unit_cell)                      , intent(out) :: Latt_unit
       Real    (Kind=Kind(0.d0))             , intent(out) :: dtau
-      Character (len=*)                     , intent(out) :: Channel
+      Character (len=:), allocatable        , intent(out) :: Channel
+      
 
-      Character (len=64) :: file_aux, str_temp1
+      Character (len=64) :: file_aux, str_temp1,  str_temp2
       Integer, allocatable :: List(:,:), Invlist(:,:)  ! For orbital structure of Unit cell
       Integer :: no, no1, n, nt, nb, Ntau, Ndim, Nbins, stat, Ndim_unit
       Real(Kind=Kind(0.d0)) :: X
@@ -283,6 +284,7 @@
       Character (len=64)  :: Model, Lattice_type
       NAMELIST /VAR_Lattice/ L1, L2, Lattice_type, Model
 
+
       write(file_aux, '(A,A)') trim(file), "_info"
       inquire(file=file_aux, exist=file_exists)
       if(file_exists) then
@@ -291,7 +293,8 @@
         12 format(A22, I10)
         13 format(A22, *(E26.17E3))
         read(10, *)
-        read(10, 11) str_temp1, Channel
+        read(10, 11) str_temp1, str_temp2
+        Channel  = trim(str_temp2)
         read(10, 12) str_temp1, Ntau
         read(10, 13) str_temp1, dtau
         read(10, *)
