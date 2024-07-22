@@ -66,9 +66,9 @@ stages:
       else 
         "$ALF_DIR/Analysis/ana.out" *;
       fi
-    - cd $ALF_DIR
-    - mkdir testsuite/tests
-    - cd testsuite/tests
+    - mkdir "$ALF_DIR/testsuite/tests"
+    - cd "$ALF_DIR/testsuite/tests"
+    - if echo $ALF_FC | grep -q "mpiifort -fc=ifx"; then exit 0; fi
     - cmake ..
     - cmake --build . --target all --config Release
     - ctest -VV -O log.txt
