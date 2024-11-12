@@ -46,8 +46,8 @@ set_hdf5_flags()
   
   H5_major=1
   H5_minor=14
-  H5_patch=4
-  H5_suff="-3"
+  H5_patch=5
+  H5_suff=""
   HDF5_DIR="$ALF_DIR/HDF5/${compiler_vers}/HDF5v${H5_major}.${H5_minor}.${H5_patch}${H5_suff}"
   if [ ! -d "$HDF5_DIR" ]; then
     printf "\nHDF5 ${H5_major}.${H5_minor}.${H5_patch}${H5_suff} is not yet installed for compiler '%s'.\n" "$compiler_vers"

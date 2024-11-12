@@ -46,7 +46,7 @@ cd "$tmpdir" || exit 1
 
 printf "\033[0;32m========== Downloading HDF5 source ==========\e[0m\n" 1>&2
 
-H5_SRC="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${H5_major}.${H5_minor}/hdf5-${H5_major}.${H5_minor}.${H5_patch}/src/hdf5-${H5_major}.${H5_minor}.${H5_patch}${H5_suff}.tar.gz"
+H5_SRC="https://support.hdfgroup.org/releases/hdf5/v${H5_major}_${H5_minor}/v${H5_major}_${H5_minor}_${H5_patch}/downloads/hdf5-${H5_major}.${H5_minor}.${H5_patch}${H5_suff}.tar.gz"
 echo "From $H5_SRC"
 source_dir="hdf5-${H5_major}.${H5_minor}.${H5_patch}${H5_suff}"
 if [ $CURL_AVAIL -eq 0 ]; then
