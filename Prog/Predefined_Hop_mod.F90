@@ -1543,7 +1543,7 @@
         endif
 
         if(present(pinned_vertices)) N_pinned_vertices = size(pinned_vertices, 1)
-        if(size(pinned_vertices, 2) .ne. 2) then
+        if(present(pinned_vertices) .and. size(pinned_vertices, 2) .ne. 2) then
            write(error_unit, *) 'Second dimension of pinned_vertices has to be 2.'
            CALL Terminate_on_error(ERROR_GENERIC,__FILE__,__LINE__)
         endif
