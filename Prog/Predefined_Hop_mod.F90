@@ -1485,7 +1485,16 @@
 
       end Subroutine Symmetrize_Families
 
-
+!--------------------------------------------------------------------
+!> @author
+!> ALF-project
+!>
+!> @brief
+!> Given a bond  I,J or  a  site  I=J,  this routine searches if belongs to the group of bonds or sites for wchich 
+!> the hopping matrix will be modified.
+!> If the bond or site is found, the routine returns the index of the bond/site in the list of pinned_vertices. 
+!
+!--------------------------------------------------------------------
       integer pure function get_i_pinned_vertex(I, J, N_pinned_vertices, pinned_vertices)
          integer, intent(in) :: I, J, N_pinned_vertices, pinned_vertices(N_pinned_vertices, 2)
          integer :: n
@@ -1533,7 +1542,7 @@
         Integer                           :: n_1, n_2, Nb, n_f,l_f, n_l, N, nc, orb
         Real   (Kind=Kind(0.d0))          :: Ham_T, Ham_Chem,  Phi_X, Phi_Y
         Logical                           :: Bulk
-        Complex(Kind=Kind(0.d0))          :: Z
+        Complex(Kind=Kind(0.d0))          :: Z,  Z1, Z2
 
         Integer                           :: N_pinned_vertices, i_pinned_vertex
 
@@ -1586,12 +1595,17 @@
            allocate(Op_T(Ndim,N_FL))
            do nf = 1,N_FL
               do n = 1,ndim
-                 Call Op_make(Op_T(n,nf),1)
-                 Op_T(n,nf)%P(1)   = n
-                 Op_T(n,nf)%O(1,1) =  this(nf)%T_Loc(list(n,2))
-                 Op_T(n,nf)%g      = -Dtau
-                 Op_T(n,nf)%alpha  =  cmplx(0.d0,0.d0, kind(0.D0))
-                 Call Op_set(Op_T(n,nf))
+                  Call Op_make(Op_T(n,nf),1)
+                  Op_T(n,nf)%P(1)   = n
+                  Z = this(nf)%T_Loc(list(n,2))
+                  if(present(pinned_vertices)) then
+                     i_pinned_vertex = get_i_pinned_vertex(n, n, N_pinned_vertices, pinned_vertices)
+                     if(i_pinned_vertex .ne. 0) Z = Z*pinning_factor(i_pinned_vertex, nf)
+                  endif
+                  Op_T(n,nf)%O(1,1) =  Z
+                  Op_T(n,nf)%g      = -Dtau
+                  Op_T(n,nf)%alpha  =  cmplx(0.d0,0.d0, kind(0.D0))
+                  Call Op_set(Op_T(n,nf))
               enddo
            enddo
         case default
@@ -1630,8 +1644,13 @@
                     ! List(N_b,4) = n_2
                     ! H_[(i,no_1),(i + n_1 a_1 + n_2 a_2,no_2)] = T(N_b)
                     Do no_I = 1, Latt_Unit%Norb
-                       I1   = Invlist(I,no_I)
-                       Op_T(1,nf)%O(I1,I1) = this(nf)%T_Loc(no_I)
+                        I1   = Invlist(I,no_I)
+                        Z = this(nf)%T_Loc(no_I) 
+                        if(present(pinned_vertices)) then
+                           i_pinned_vertex = get_i_pinned_vertex(I1, I1, N_pinned_vertices, pinned_vertices)
+                           if(i_pinned_vertex .ne. 0) Z = Z*pinning_factor(i_pinned_vertex, nf)
+                        endif
+                        Op_T(1,nf)%O(I1,I1) = Z
                     Enddo
                  enddo
                  Do I = 1,Ndim
@@ -1679,20 +1698,26 @@
                        n_1  = this(nf)%list(Nb,3)
                        n_2  = this(nf)%list(Nb,4)
                        J    = Latt%nnlist(I,n_1,n_2)
+                       I1   = Invlist(I,no_I)
+                       J1   = Invlist(J,no_J)
                        Z    = Generic_hopping(I,no_I, n_1, n_2, no_J, N_Phi, Phi_x,Phi_y, Bulk, Latt, Latt_Unit)
+                       Z1   = this(nf)%T_loc(no_I)/this(1)%Multiplicity(no_I)
+                       Z2   = this(nf)%T_loc(no_J)/this(1)%Multiplicity(no_J)
                        if(present(pinned_vertices)) then
                           i_pinned_vertex = get_i_pinned_vertex(I1, J1, N_pinned_vertices, pinned_vertices)
                           if(i_pinned_vertex .ne. 0) Z = Z*pinning_factor(i_pinned_vertex, nf)
+                          i_pinned_vertex = get_i_pinned_vertex(I1, I1, N_pinned_vertices, pinned_vertices)
+                          if(i_pinned_vertex .ne. 0) Z1 = Z1*pinning_factor(i_pinned_vertex, nf)
+                          i_pinned_vertex = get_i_pinned_vertex(J1, J1, N_pinned_vertices, pinned_vertices)
+                          if(i_pinned_vertex .ne. 0) Z2 = Z2*pinning_factor(i_pinned_vertex, nf)
                        endif
-                       I1   = Invlist(I,no_I)
-                       J1   = Invlist(J,no_J)
                        nc = nc + 1
                        Op_T(nc,nf)%P(1) = I1
                        Op_T(nc,nf)%P(2) = J1
                        Op_T(nc,nf)%O(1,2) = this(nf)%T(Nb)*Z
                        Op_T(nc,nf)%O(2,1) = Conjg(this(nf)%T(Nb)*Z)
-                       Op_T(nc,nf)%O(1,1) = this(nf)%T_loc(no_I)/this(1)%Multiplicity(no_I)
-                       Op_T(nc,nf)%O(2,2) = this(nf)%T_loc(no_J)/this(1)%Multiplicity(no_J)
+                       Op_T(nc,nf)%O(1,1) = Z1
+                       Op_T(nc,nf)%O(2,2) = Z2
                        Op_T(nc,nf)%g = -Dtau*this(1)%Prop_Fam(n_f)
                        Op_T(nc,nf)%alpha=cmplx(0.d0,0.d0, kind(0.D0))
                        Call Op_set(Op_T(nc,nf))
