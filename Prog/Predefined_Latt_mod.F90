@@ -179,7 +179,7 @@
                CALL Terminate_on_error(ERROR_GENERIC,__FILE__,__LINE__)
             endif
             Latt_Unit%Norb    = 3
-            Latt_Unit%N_coord = 1 ! This is badly  defined  for this lattice. 
+            Latt_Unit%N_coord = 4 
             a1_p(1) =  1.D0   ; a1_p(2) =  0.d0
             a2_p(1) =  0.5D0  ; a2_p(2) =  sqrt(3.D0)/2.D0
             Allocate (Latt_Unit%Orb_pos_p(3,2))
