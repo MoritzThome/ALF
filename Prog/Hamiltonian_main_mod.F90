@@ -514,7 +514,6 @@
              endif
     
              if ( allocated(Obs_local) ) then
-               Write(6,*) 'Hi'
                Do I = 1,Size(Obs_local,1)
                   Call Obser_Latt_Local_Init(Obs_local(I))
                Enddo
