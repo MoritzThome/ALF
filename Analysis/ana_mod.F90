@@ -1293,6 +1293,7 @@ subroutine Cov_local(name_obs, filename_h5)
    
    if( present(filename_h5) ) then
 #ifdef HDF5
+      Write(6,*) 'Reading from HDF5 file:', filename_h5
       call read_local_hdf5(filename_h5, name_obs, sgn, bins_raw, Latt, Latt_unit, dtau, Channel)
 #endif
    else

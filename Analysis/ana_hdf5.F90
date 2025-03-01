@@ -97,6 +97,19 @@
       enddo
       
       do n=1, size(names)
+         Write(6,*) names(n)
+         name = names(n)
+         i = len(trim(name)) -5
+         if ( i > 1 ) then
+            if ( name(i:) == '_local' ) then
+               print *, ''
+               print '(A,A)', "analyzing equal time local observables ", name
+               call Cov_local(name,File_in)
+            endif
+         endif
+      enddo
+
+      do n=1, size(names)
          name = names(n)
          i = len(trim(name)) -3
          if ( i > 1 ) then
