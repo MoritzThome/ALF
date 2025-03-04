@@ -1,4 +1,4 @@
-!  Copyright (C) 2019 The ALF project
+!  Copyright (C) 2019-2025 The ALF project
 !
 !     The ALF project is free software: you can redistribute it and/or modify
 !     it under the terms of the GNU General Public License as published by
@@ -1330,7 +1330,8 @@ Subroutine ana_local(name, sgn, bins_raw, Latt, Latt_unit)
    
    Character (len=64) :: File_out
    Integer :: N_skip, N_rebin, N_Cov, N_Back, N_auto
-   Integer :: Nbins
+   Integer :: Nbins, N_BZ_Zones
+   Logical :: Extended_Zone
    Integer :: i, n, nb, no, no1, ierr
    Complex (Kind=Kind(0.d0)), allocatable :: Phase(:)
    Complex (Kind=Kind(0.d0)), allocatable :: V_help(:)
@@ -1338,7 +1339,7 @@ Subroutine ana_local(name, sgn, bins_raw, Latt, Latt_unit)
    Complex (Kind=Kind(0.d0)) :: Z, Xmean, Xerr, Xmean_r, Xerr_r
    Real (Kind=Kind(0.d0)) :: Xm,Xe
    
-   NAMELIST /VAR_errors/ N_skip, N_rebin, N_Cov, N_Back, N_auto
+   NAMELIST /VAR_errors/ N_skip, N_rebin, N_Cov, N_Back, N_auto, N_BZ_Zones, Extended_Zone
 
    N_skip = 1
    N_rebin = 1
