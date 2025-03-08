@@ -30,6 +30,9 @@ Further optional arguments:
                but instead return with value 1
 To hand an additional flag to the compiler, export it in the varible ALF_FLAGS_EXT prior to sourcing this script.
 
+ALF usually self-compiles HDF5 and stores the library in subdirectories of ALF/HDF5.
+This behavior can be changed by setting the environment variable ALF_HDF5_DIR.
+
 For more details check the documentation.\n"
 
 STABCONFIGURATION=""
