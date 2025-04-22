@@ -243,7 +243,7 @@ Program MaxEnt_Wrapper
           else
              Call Set_Ker_classic(Xker_ph_c,Xker_classic,Om_st,Om_en,beta,xtau_st)
              Call  MaxEnt( XQMC, XCOV, A_classic, XKER_classic, Alpha_classic_st, CHISQ ,DEFAULT)
-          endif		  
+          endif       
        Case ("PP")
           If  (Stochastic) then
              Call MaxEnt_stoch(XQMC, Xtau, Xcov, Xmom1, XKER_pp, Back_Trans_pp, Beta, &
@@ -316,7 +316,7 @@ Program MaxEnt_Wrapper
                    do i = 1,Ngamma
                       X = X + alp_bf(i)*Xker_ph(tau,om_bf(i), beta)
                    enddo
-				Case ("PH_C")
+                Case ("PH_C")
                    do i = 1,Ngamma
                       X = X + alp_bf(i)*Xker_ph_c(tau,om_bf(i), beta)
                    enddo
@@ -376,7 +376,7 @@ Program MaxEnt_Wrapper
                 do  nw  = 1,Ndis
                    A(nw) =  Back_trans_ph(A(nw), xom(nw), beta)
                 enddo
-			 Case ("PH_C")
+             Case ("PH_C")
                 do  nw  = 1,Ndis
                    A(nw) =  Back_trans_ph_c(A(nw), xom(nw), beta)
                 enddo
