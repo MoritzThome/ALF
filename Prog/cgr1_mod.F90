@@ -345,7 +345,7 @@ module cgr1_mod
             ! This is supposed to solve the system 
             ! URUP U D V P^dagger ULUP G = 1
             ! initialize the rhs with CT(URUP)
-            RHS = CT(udvr%U)
+            RHS = conjg(transpose(udvr%U))
 #if (defined(STAB3) || defined(STABLOG))
             !scale RHS=R_+^-1*RHS
             do J=1,N_size
