@@ -158,7 +158,7 @@ create_doc:
     - latexmk -pdf doc.tex
 
 create_doxygen:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-clang
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bookworm-buildd
   stage: build_doc
   needs: []
   artifacts:
@@ -171,7 +171,7 @@ create_doxygen:
       - doxygen doxygen/Doxyfile
 
 pages:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-clang
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bookworm-buildd
   stage: build_doc
   script:
     - apt-get update && apt install -y doxygen graphviz
@@ -185,14 +185,10 @@ pages:
     - if: '$CI_COMMIT_BRANCH == "master"'
 
 
-build_hdf5_GNU-Buster:
-  extends: .build_hdf5_template
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/alf-requirements/buster
-  needs: []
 build_hdf5_GNU-Bullseye:
   extends: .build_hdf5_template
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/alf-requirements/bullseye
-  needs: [build_hdf5_GNU-Buster]
+  needs: []
 build_hdf5_GNU-Bookworm:
   extends: .build_hdf5_template
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/alf-requirements/bookworm
@@ -232,7 +228,7 @@ test:
   parallel:
     matrix:
       - MACHINE: GNU
-        IMAGE_MINOR: [buster, bullseye, bookworm]
+        IMAGE_MINOR: [bullseye, bookworm]
         MODE: [noMPI, MPI, TEMPERING, PARALLEL_PARAMS]
         DEVEL: ["", Devel]
         CONFIG_ARGS: ["", "HDF5"]
