@@ -114,7 +114,7 @@ contains
 
      end function F_QFI_ph_c
 
-     Real (Kind=Kind(0.d0)) function Back_trans_ph(Aom, beta, om)
+     Real (Kind=Kind(0.d0)) function Back_trans_ph(Aom, om, beta )
 
        Implicit None
        real (Kind=Kind(0.d0)), intent(in) ::  Aom, beta, om
@@ -139,7 +139,7 @@ contains
 
      end function BACK_TRANS_PH_C
 
-     Real (Kind=Kind(0.d0)) function Back_trans_pp(Aom, beta, om)
+     Real (Kind=Kind(0.d0)) function Back_trans_pp(Aom, om, beta)
 
        Implicit None
        real (Kind=Kind(0.d0)), intent(in) ::  Aom, beta, om
