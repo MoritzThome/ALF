@@ -420,22 +420,28 @@ Program MaxEnt_Wrapper
           do nwp = 1,Ndis
              omp = xom(nwp)
              If  (((str_to_upper(Channel) == "P_PH") .or. (str_to_upper(Channel) == "PH_C")) .and.  omp > 0.00001d0  )  then 
+               ! In this case A(om)  = A (-om) and om > 0
                Z = Z + A(nwp)/cmplx(  om -  omp, delta, kind(0.d0)) &
                    & + A(nwp)/cmplx(  om +  omp, delta, kind(0.d0)) 
+            elseif ( str_to_upper(Channel) == "PH" .and.  omp > 0.00001d0  ) then 
+               ! In this case S(q,-om)=  exp(-beta*om) S(q,om)   and om > 0 
+               Z = Z + A(nwp)/cmplx(  om -  omp, delta, kind(0.d0)) &
+                   & + A(nwp)*exp(-beta*om)/cmplx(  om +  omp, delta, kind(0.d0)) 
             else
+               ! No symmetry is used
                Z = Z + A(nwp)/cmplx( om -  omp, delta, kind(0.d0))
             endif
           enddo
           Z = Z * dom
-          x  = x  - Aimag(Z)/pi
-          x1 = x1 - om*Aimag(Z)/pi
-          x2 = x2 - om*om*Aimag(Z)/pi
           If (Test)   then 
+            x  = x  - Aimag(Z)/pi
+            x1 = x1 - om*Aimag(Z)/pi
+            x2 = x2 - om*om*Aimag(Z)/pi
             write(43,"('X',2x,F14.7,2x,F16.8,2x,F16.8,2x,F14.7,2x,F14.7,2x,F14.7)")  & 
-                & xom(nw), dble(Z), -Aimag(Z)/pi,  X*dom, x1*dom, x2*dom
+               & xom(nw), dble(Z), -Aimag(Z)/pi,  X*dom, x1*dom, x2*dom
           else
             write(43,"('X',2x,F14.7,2x,F16.8,2x,F16.8)")  & 
-                & xom(nw), dble(Z), -Aimag(Z)/pi
+               & xom(nw), dble(Z), -Aimag(Z)/pi
           endif   
        enddo
        close(43)
