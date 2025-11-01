@@ -36,8 +36,9 @@ def copy_parameters(sim_dir, hamiltonian_file):
 
 def _get_arg_parser():
     parser = ArgumentParser(
-        description='Convert plain text bins and paramerts to HDF5 file. '
-        'Moves plain text bins to "old_bins" subfolder or optionally removes them. '
+        description='Convert plain text bins and parameters to HDF5 file. '
+        'Moves plain text bin and associated _info files to "old_bins" '
+        'subfolder or optionally removes them. '
         'One could run a bigger batch with '
         r'`find . -name "Ener_scal" -execdir ${ALF_DIR}/Analysis/copy_parameters.py \;` '
         'Where "Ener_scal" can be replaced by any file name for recognizing simulation folders.',
@@ -65,6 +66,7 @@ if __name__ == "__main__":
 
     convert_scal = os.path.join(args.alfdir, 'Analysis', 'convert_scal.out')
     convert_latt = os.path.join(args.alfdir, 'Analysis', 'convert_latt.out')
+    convert_local = os.path.join(args.alfdir, 'Analysis', 'convert_local.out')
 
     ham_names, ham_files = get_ham_names_ham_files(
         os.path.join(args.alfdir, 'Prog', 'Hamiltonians.list'))
@@ -80,17 +82,21 @@ if __name__ == "__main__":
         print(f'Convert bins in folder "{os.path.abspath(directory)}"')
         os.mkdir(os.path.join(directory, 'old_bins'))
         for dir_content in os.listdir(path=directory):
+            old_bins = []
             if dir_content.endswith('_scal'):
                 subprocess.run([convert_scal, dir_content, 'data.h5'], check=True, cwd=directory)
-                if args.remove_old_bins:
-                    os.remove(os.path.join(directory, dir_content))
-                else:
-                    os.rename(os.path.join(directory, dir_content),
-                        os.path.join(directory, 'old_bins', dir_content))
+                old_bins.append(dir_content)
             elif dir_content.endswith('_eq') or dir_content.endswith('_tau'):
                 subprocess.run([convert_latt, dir_content, 'data.h5'], check=True, cwd=directory)
+                old_bins.append(dir_content)
+            elif dir_content.endswith('_local') or dir_content.endswith('_localtau'):
+                subprocess.run([convert_local, dir_content, 'data.h5'], check=True, cwd=directory)
+                old_bins.append(dir_content)
+
+            info_files = [f+'_info' for f in old_bins if os.path.isfile(os.path.join(directory, f+'_info'))]
+            for file in old_bins+info_files:
                 if args.remove_old_bins:
-                    os.remove(os.path.join(directory, dir_content))
+                    os.remove(os.path.join(directory, file))
                 else:
-                    os.rename(os.path.join(directory, dir_content),
-                        os.path.join(directory, 'old_bins', dir_content))
+                    os.rename(os.path.join(directory, file),
+                        os.path.join(directory, 'old_bins', file))
