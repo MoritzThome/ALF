@@ -242,8 +242,14 @@
             CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
           endif
           If (Mz .and. N_FL == 1) then
-            Write(error_unit,*) 'Ham_Set: If Mz = True, N_FL has to be 2'
-            CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
+#ifdef MPI
+            If (Irank_g == 0) then
+#endif  
+               Write(error_unit,*) 'Setting N_FL = 2 since this is mandatory for Mz-Hubbard model'
+#ifdef MPI
+            endif 
+#endif
+            N_FL = 2
           endif
           If (N_FL == 2 .and. mod(N_SUN,2) /= 0) then
             Write(error_unit,*) 'Ham_Set: If N_FL = 2, N_SUN has to be even'
