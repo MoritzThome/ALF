@@ -474,7 +474,7 @@
           Use Predefined_Int
           Implicit none
 
-          Integer :: nf, I, I1, I2,  nc,  J, no,  N_ops, nf
+          Integer :: nf, I, I1, I2,  nc,  J, no,  N_ops
           Real (Kind=Kind(0.d0)) :: X,  Zero = 1.D-10
           Real (Kind=Kind(0.d0)), allocatable :: Ham_U_vec(:)
 
