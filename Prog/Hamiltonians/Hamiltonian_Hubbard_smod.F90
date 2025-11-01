@@ -255,6 +255,10 @@
             Write(error_unit,*) 'Ham_Set: If N_FL = 2, N_SUN has to be even'
             CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
           endif
+          If (abs(ham_h0) >= 1.D-10 .and. N_FL /= 2 ) then
+            Write(error_unit,*) 'Ham_Set: Set N_fl=2 if you want to use the pinning field'
+            CALL Terminate_on_error(ERROR_HAMILTONIAN,__FILE__,__LINE__)
+          endif
 
           If (N_FL == 2 )  then 
             N_SUN = N_SUN/2
@@ -420,7 +424,7 @@
             ! Set pinning field
             x_p = 0.d0 
             i = invlist(Inv_R(x_p,Latt),1) 
-            allocate(pinning_factor(1,N_FL), pinned_vertices(1,N_FL), pinning_offset(1,N_FL) ) 
+            allocate(pinning_factor(1,2), pinned_vertices(1,2), pinning_offset(1,2) ) 
             pinned_vertices(1,1) = i 
             pinned_vertices(1,2) = i 
             pinning_factor(1,1) =   1.d0 
@@ -573,13 +577,12 @@
              Call Obser_Vec_make(Obs_scal(I),N,Filename)
           enddo
           ! Local quantities 
-          Allocate ( Obs_local(2) )
-          Filename = "Double"
-          Channel = "--"
-          Call Obser_Latt_Local_make(Obs_local(1), 1, Filename, Latt, Latt_unit, Channel, dtau)
-          Filename = "Sz"
-          Channel = "--"
-          Call Obser_Latt_Local_make(Obs_local(2), 1, Filename, Latt, Latt_unit, Channel, dtau)
+          If (abs(ham_h0) >= 1.D-10 ) then
+            Allocate ( Obs_local(1) )
+            Filename = "SpinZ"
+            Channel = "--"
+            Call Obser_Latt_Local_make(Obs_local(1), 1, Filename, Latt, Latt_unit, Channel, dtau)
+          endif
           ! Equal time correlators
           If ( N_FL == 2 ) Then
              Allocate ( Obs_eq(5) )
@@ -766,21 +769,20 @@
 
           Obs_scal(4)%Obs_vec(1)  =    Obs_scal(4)%Obs_vec(1) + (Zkin + Zpot)*ZP*ZS
 
-          ! Compute local observables.
-          Do I = 1,Size(Obs_local,1)
-             Obs_local(I)%N         =  Obs_local(I)%N + 1
-             Obs_local(I)%Ave_sign  =  Obs_local(I)%Ave_sign + Real(ZS,kind(0.d0))
-          Enddo
-          Do I = 1,Latt%N
-            do no_I = 1,Latt_unit%Norb
-               I1 = Invlist(I,no_I)
-               Obs_Local(1)%Obs_Latt(I,1,no_I) = Obs_Local(1)%Obs_Latt(I,1,no_I)  + & 
-               &       Grc(i1,i1,1) * Grc(i1,i1, dec)*ZP*ZS
-              Obs_Local(2)%Obs_Latt(I,1,no_I) = Obs_Local(2)%Obs_Latt(I,1,no_I)  + & 
-               &       (Grc(i1,i1,1)  -  Grc(i1,i1, dec))*ZP*ZS 
-            enddo
-          Enddo
-
+          If (abs(ham_h0) >= 1.D-10 ) then
+            ! Compute local observables.
+            Do I = 1,Size(Obs_local,1)
+               Obs_local(I)%N         =  Obs_local(I)%N + 1
+               Obs_local(I)%Ave_sign  =  Obs_local(I)%Ave_sign + Real(ZS,kind(0.d0))
+            Enddo
+            Do I = 1,Latt%N
+               do no_I = 1,Latt_unit%Norb
+                  I1 = Invlist(I,no_I)
+                  Obs_Local(1)%Obs_Latt(I,1,no_I) = Obs_Local(1)%Obs_Latt(I,1,no_I)  + & 
+                  &       (Grc(i1,i1,1)  -  Grc(i1,i1, dec))*ZP*ZS 
+               enddo
+            Enddo
+          endif
 
           ! Standard two-point correlations
           If ( N_FL == 2  ) then
