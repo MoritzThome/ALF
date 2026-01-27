@@ -1,6 +1,6 @@
 # Log of backward compatibility changes and critical bugs
 
-### 2026-01-17 Intel ifx compiler without `-heap-arrays 1024`
+### 2026-01-27 Intel ifx compiler without `-heap-arrays 1024`
 Author: J. Schwab
 Merge request !234
 
