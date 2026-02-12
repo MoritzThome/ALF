@@ -2,13 +2,13 @@ name: Mirror
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, 'ALF-**']
     tags: ['*']
 
 jobs:
   gitlab:
     uses: MoritzThome/ALF/.github/workflows/mirror-template.yml@master
-    if: github.repository == 'AMF-QMC/ALF'
+    if: github.repository == 'MoritzThome/ALF'
     with:
       git_url: "git.physik.uni-wuerzburg.de/mthome/ALF"
     secrets:
