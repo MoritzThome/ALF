@@ -1,15 +1,14 @@
+name: Mirror
+
 on:
   push:
-    branches:
-      - master
-      - main
-  steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - uses: yesolutions/mirror-action@master
-      with:
-        REMOTE: 'https://git.physik.uni-wuerzburg.de/mthome/ALF.git'
-        GIT_USERNAME: deploy-token
-        GIT_PASSWORD: ${{ secrets.GITLAB_MIRROR_TOKEN }}
-        PUSH_ALL_REFS: false
+    branches: [main, master]
+    tags: ['*']
+
+jobs:
+  gitlab:
+    uses: MoritzThome/ALF/.github/workflows/mirror-template.yml@master
+    with:
+      git_url: "git.physik.uni-wuerzburg.de/mthome/ALF"
+    secrets:
+      GIT_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
